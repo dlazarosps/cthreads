@@ -32,4 +32,45 @@ typedef struct s_TCB {
 } TCB_t; 
 
 
+/* Definido pelo grupo */
+#define FALSE 0
+#define TRUE 1
+
+#define DEBUG FALSE
+
+#define prio ticket
+
+struct control {
+	int initiated;
+
+	FILA2 allThreads;
+
+	PFILA2 blockedThreads;
+
+	PFILA2 prio0_Threads;
+	PFILA2 prio1_Threads;
+	PFILA2 prio2_Threads;
+	PFILA2 prio3_Threads;
+
+	TCB_t* runningThread;
+	ucontext_t endThread;
+};
+
+extern struct control controlBlock;
+
+typedef struct Pjoin{
+	TCB_t* waiting;
+	TCB_t* awaited;
+} Pjoin;
+
+
+int cinit(void);
+void endThread(void);
+void insertThreadToFila(int prio, void * thread);
+void removeThreadFromFila(int prio, int tid);
+int generateTID(void);
+
+int scheduler(void);
+int dispatcher(TCB_t *nextRunningThread);
+
 #endif
