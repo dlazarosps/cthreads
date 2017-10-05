@@ -192,7 +192,7 @@ int cidentify (char *name, int size) {
     return 0;
   }
 
-  char info[] = "\n Douglas Lazaro S P Silva \t- 207305 \n Francisco Paiva Knebel \t- 243688 \n Guilherme Fonseca Ribeiro \t- 228415";
+  char info[] = "\n Douglas Lazaro S P Silva \t- 207305 \n Henrique La Porta \t- 273112 \n Rodrigo Okido \t- 252745";
   int length = strlen(info);
 
   if(size < length) {
