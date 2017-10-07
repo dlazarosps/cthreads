@@ -62,7 +62,6 @@ typedef struct Pjoin{
 int cinit(void);
 void endThread(void);
 void insertThreadToFila(int prio, void * thread);
-void removeThreadFromFila(int prio, int tid);
 int generateTID(void);
 
 int scheduler(void);

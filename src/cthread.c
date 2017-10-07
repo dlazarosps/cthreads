@@ -32,13 +32,13 @@ int ccreate (void* (*start)(void*), void *arg, int prio) {
 
   makecontext(&newThread->context, (void(*))start, 1, arg);
 
-  insertFILA2(&controlBlock.aptoThreads, (void *) newThread);
   insertFILA2(&controlBlock.allThreads, (void *) newThread);
   insertThreadToFila(prio, (void *) newThread);
 
   return newThread->tid;
 };
 
+/*
 int csetprio(int tid, int prio) {
   if (!controlBlock.initiated) {
     cinit();
@@ -59,6 +59,7 @@ int csetprio(int tid, int prio) {
     return -1;
   }
 };
+*/
 
 int cyield(void) {
   if (!controlBlock.initiated) {

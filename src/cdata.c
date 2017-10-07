@@ -85,30 +85,9 @@ void endThread(void){
 }
 
 void insertThreadToFila(int prio, void * thread) {
-  switch (prio) {
-    case 0:
-      insertFILA2((PFILA2) &controlBlock.aptoThreads, thread);
-      break;
-    case 1:
-      insertFILA2((PFILA2) &controlBlock.blockedThreads, thread);
-      break;
-    default:
-      break;
-  }
+  /*TO DO*/  
 }
 
-void removeThreadFromFila(int prio, int tid) {
-  switch (prio) {
-    case 0:
-      removeFILA2((PFILA2) &controlBlock.aptoThreads, tid);
-      break;
-    case 1:
-      removeFILA2((PFILA2) &controlBlock.blockedThreads, tid);
-      break;
-    default:
-      break;
-  }
-}
 
 int generateTID(void) {
 	static int globalTID = 0;
@@ -121,10 +100,7 @@ int scheduler(void) {
 
   if (FirstFila2((PFILA2) &controlBlock.aptoThreads) == 0) {
     nextRunningThread = (TCB_t*) GetAtIteratorFila2((PFILA2) &controlBlock.aptoThreads);
-    removeThreadFromFila(0, nextRunningThread->tid);
-  } else if (FirstFila2((PFILA2) &controlBlock.blockedThreads) == 0) {
-    nextRunningThread = (TCB_t*) GetAtIteratorFila2((PFILA2) &controlBlock.blockedThreads);
-    removeThreadFromFila(1, nextRunningThread->tid);
+    removeFILA2((PFILA) &controlBlock.aptoThreads, nextRunningThread->tid);
   } else {
     return -1;
   }
