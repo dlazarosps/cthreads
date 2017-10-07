@@ -18,21 +18,13 @@ int cinit(void) {
   check = initFILA2(&controlBlock.allThreads, FALSE);
   if(!check) return -1;
 
-  check = initFILA2(controlBlock.blockedThreads, TRUE);
+  check = initFILA2(controlBlock.aptoThreads, TRUE);
   if(!check) return -2;
 
-  check = initFILA2(controlBlock.prio0_Threads, TRUE);
+  check = initFILA2(controlBlock.blockedThreads, TRUE);
   if(!check) return -3;
 
-  check = initFILA2(controlBlock.prio1_Threads, TRUE);
-  if(!check) return -4;
-
-  check = initFILA2(controlBlock.prio2_Threads, TRUE);
-  if(!check) return -5;
-
-  check = initFILA2(controlBlock.prio3_Threads, TRUE);
-  if(!check) return -6;
-
+  
   /*
     Creates the main thread.
     Appends it to the allThreads structure.
@@ -95,16 +87,10 @@ void endThread(void){
 void insertThreadToFila(int prio, void * thread) {
   switch (prio) {
     case 0:
-      insertFILA2((PFILA2) &controlBlock.prio0_Threads, thread);
+      insertFILA2((PFILA2) &controlBlock.aptoThreads, thread);
       break;
     case 1:
-      insertFILA2((PFILA2) &controlBlock.prio1_Threads, thread);
-      break;
-    case 2:
-      insertFILA2((PFILA2) &controlBlock.prio2_Threads, thread);
-      break;
-    case 3:
-      insertFILA2((PFILA2) &controlBlock.prio3_Threads, thread);
+      insertFILA2((PFILA2) &controlBlock.blockedThreads, thread);
       break;
     default:
       break;
@@ -114,16 +100,10 @@ void insertThreadToFila(int prio, void * thread) {
 void removeThreadFromFila(int prio, int tid) {
   switch (prio) {
     case 0:
-      removeFILA2((PFILA2) &controlBlock.prio0_Threads, tid);
+      removeFILA2((PFILA2) &controlBlock.aptoThreads, tid);
       break;
     case 1:
-      removeFILA2((PFILA2) &controlBlock.prio1_Threads, tid);
-      break;
-    case 2:
-      removeFILA2((PFILA2) &controlBlock.prio2_Threads, tid);
-      break;
-    case 3:
-      removeFILA2((PFILA2) &controlBlock.prio3_Threads, tid);
+      removeFILA2((PFILA2) &controlBlock.blockedThreads, tid);
       break;
     default:
       break;
@@ -139,18 +119,12 @@ int generateTID(void) {
 int scheduler(void) {
   TCB_t* nextRunningThread;
 
-  if (FirstFila2((PFILA2) &controlBlock.prio0_Threads) == 0) {
-    nextRunningThread = (TCB_t*) GetAtIteratorFila2((PFILA2) &controlBlock.prio0_Threads);
+  if (FirstFila2((PFILA2) &controlBlock.aptoThreads) == 0) {
+    nextRunningThread = (TCB_t*) GetAtIteratorFila2((PFILA2) &controlBlock.aptoThreads);
     removeThreadFromFila(0, nextRunningThread->tid);
-  } else if (FirstFila2((PFILA2) &controlBlock.prio1_Threads) == 0) {
-    nextRunningThread = (TCB_t*) GetAtIteratorFila2((PFILA2) &controlBlock.prio1_Threads);
+  } else if (FirstFila2((PFILA2) &controlBlock.blockedThreads) == 0) {
+    nextRunningThread = (TCB_t*) GetAtIteratorFila2((PFILA2) &controlBlock.blockedThreads);
     removeThreadFromFila(1, nextRunningThread->tid);
-  } else if (FirstFila2((PFILA2) &controlBlock.prio2_Threads) == 0) {
-    nextRunningThread = (TCB_t*) GetAtIteratorFila2((PFILA2) &controlBlock.prio2_Threads);
-    removeThreadFromFila(2, nextRunningThread->tid);
-  } else if (FirstFila2((PFILA2) &controlBlock.prio3_Threads) == 0) {
-    nextRunningThread = (TCB_t*) GetAtIteratorFila2((PFILA2) &controlBlock.prio3_Threads);
-    removeThreadFromFila(3, nextRunningThread->tid);
   } else {
     return -1;
   }

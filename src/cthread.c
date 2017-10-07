@@ -32,6 +32,7 @@ int ccreate (void* (*start)(void*), void *arg, int prio) {
 
   makecontext(&newThread->context, (void(*))start, 1, arg);
 
+  insertFILA2(&controlBlock.aptoThreads, (void *) newThread);
   insertFILA2(&controlBlock.allThreads, (void *) newThread);
   insertThreadToFila(prio, (void *) newThread);
 

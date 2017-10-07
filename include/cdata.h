@@ -44,14 +44,9 @@ struct control {
 	int initiated;
 
 	FILA2 allThreads;
-
-	PFILA2 blockedThreads;
-
-	PFILA2 prio0_Threads;
-	PFILA2 prio1_Threads;
-	PFILA2 prio2_Threads;
-	PFILA2 prio3_Threads;
-
+	PFILA2 aptoThreads
+	PFILA2 blockedThreads
+	
 	TCB_t* runningThread;
 	ucontext_t endThread;
 };
