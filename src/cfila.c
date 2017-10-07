@@ -35,6 +35,19 @@ void insertFILA2(PFILA2 fila, void* element) {
   return;
 }
 
+void insertAfterFILA2(PFILA2 fila, void* element) {
+  InsertAfterIteratorFila2(fila, element);
+  FirstFila2(fila);
+
+  return;
+}
+void insertBeforeFILA2(PFILA2 fila, void* element) {
+  InsertBeforeIteratorFila2(fila, element);
+  FirstFila2(fila);
+
+  return;
+}
+
 int searchFILA2(PFILA2 fila, int tid, int resetIterator) {
   int found = FALSE;
   int finished = FALSE;

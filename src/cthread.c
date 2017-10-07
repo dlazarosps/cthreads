@@ -80,44 +80,9 @@ int cjoin(int tid) {
     cinit();
   }
 
-  TCB_t* joinThread;
-  if(searchFILA2(&controlBlock.allThreads, tid, TRUE) == TRUE) {
-    joinThread = (TCB_t*) GetAtIteratorFila2(&controlBlock.allThreads);
-  } else {
-    /* TID not found */
-    return -1;
-  }
-
-  /* runningThread é a thread procurada */
-  if (controlBlock.runningThread->tid == tid) {
-    return -2;
-  }
-
-  if(joinThread->state == PROCST_TERMINO) {
-    return 0;
-  }
-
-  /* TO DO */
-
-  /* Verificações de bloqueio */
-  if (searchFILA2join(controlBlock.blockedThreads, tid, TRUE) == TRUE)
-  {
-    return -3;
-  }
-
-  /* Coloca thread ativa na fila de bloqueados */
-  TCB_t* currentThread = controlBlock.runningThread;
-  currentThread->state = PROCST_BLOQ;
-
-  Pjoin * block;
-
-  block = (Pjoin*) malloc(sizeof(Pjoin));
-
-  block->waiting = currentThread;
-  block-> awaited = joinThread;
-
-  insertFILA2((PFILA2) &controlBlock.blockedThreads,(void*) block);
-
+  /*TO DO*/
+  //Código e lógica de implementação correta
+  
   /* troca de contexto */
   scheduler();
 

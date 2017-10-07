@@ -71,25 +71,49 @@ void endThread(void){
   	printf("TID: %i has ended. \n", controlBlock.runningThread->tid);
 	#endif
 
-	if (searchFILA2join(controlBlock.blockedThreads, controlBlock.runningThread->tid, TRUE) == TRUE)
-	{	
-		Pjoin* joinThread;
-		joinThread = (Pjoin*) GetAtIteratorFila2(controlBlock.blockedThreads);
-
-		TCB_t* releaseThread = joinThread->waiting;
-		releaseThread->state = PROCST_APTO;
-		insertThreadToFila(releaseThread->prio, (void *) releaseThread);
-	}
+    /* TO DO */
+    // verificar threads bloqueadas que estavam esperando thread que terminou
 
 	scheduler();
 }
 
 void insertThreadToFila(int prio, void * thread) {
-  /*TO DO*/  
+  int finished = FALSE;
+  TCB_t* node;
+  TCB_t* nextnode;
+
+  PFILA2 fila = controlBlock.aptoThreads;
+  FirstFila2(fila);
+
+  do {
+    node = (TCB_t*) GetAtIteratorFila2(fila);
+    if (node == NULL) //fila vazia
+    {
+      insertFILA2(fila, (void*) thread);
+      finished = TRUE;
+    }
+    else{
+      if(node->prio <= prio)
+      {
+        nextnode = (TCB_t*) GetAtNextIteratorFila2(fila);
+        if(nextnode->prio > prio){
+          insertBeforeFILA2(fila, (void*) thread);
+          finished = TRUE;
+        }
+      }
+      else{
+        insertBeforeFILA2(fila, (void*) thread);
+        finished = TRUE;
+      }
+    }
+
+  } while(!finished);
 }
 
 
 int generateTID(void) {
+  /*TO DO */
+  //verificar a unicidade dos TIDs criados
 	static int globalTID = 0;
 
 	return ++globalTID;
@@ -100,7 +124,7 @@ int scheduler(void) {
 
   if (FirstFila2((PFILA2) &controlBlock.aptoThreads) == 0) {
     nextRunningThread = (TCB_t*) GetAtIteratorFila2((PFILA2) &controlBlock.aptoThreads);
-    removeFILA2((PFILA) &controlBlock.aptoThreads, nextRunningThread->tid);
+    removeFILA2((PFILA2) &controlBlock.aptoThreads, nextRunningThread->tid);
   } else {
     return -1;
   }
@@ -111,12 +135,17 @@ int scheduler(void) {
 }
 
 int dispatcher(TCB_t* nextRunningThread){
-	TCB_t* currentThread = controlBlock.runningThread;
-  	currentThread->state = PROCST_APTO;
+  TCB_t* currentThread = controlBlock.runningThread;
+  currentThread->state = PROCST_APTO;
 
-  	insertThreadToFila(currentThread->prio, (void *) currentThread);
-  	controlBlock.runningThread = nextRunningThread;
+  /*TO DO*/
+  //falta validar quando for a primeira vez que está rodando  
+  currentThread->prio = currentThread->prio + stopTimer(); 
+  insertThreadToFila(currentThread->prio, (void *) currentThread);
 
-  	swapcontext(&currentThread->context, &nextRunningThread->context);
-  	return 0;
+  controlBlock.runningThread = nextRunningThread;
+
+  swapcontext(&currentThread->context, &nextRunningThread->context);
+  startTimer();
+	return 0;
 }

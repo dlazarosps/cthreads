@@ -8,7 +8,9 @@
  */
 #ifndef __cdata__
 #define __cdata__
-#include "ucontext.h"
+
+#include <ucontext.h>
+#include "support.h"
 
 #define	PROCST_CRIACAO	0
 #define	PROCST_APTO	1
@@ -38,14 +40,13 @@ typedef struct s_TCB {
 
 #define DEBUG FALSE
 
-#define prio ticket
-
 struct control {
 	int initiated;
 
 	FILA2 allThreads;
-	PFILA2 aptoThreads
-	PFILA2 blockedThreads
+	
+	PFILA2 aptoThreads;
+	PFILA2 blockedThreads;
 	
 	TCB_t* runningThread;
 	ucontext_t endThread;
@@ -53,17 +54,10 @@ struct control {
 
 extern struct control controlBlock;
 
-typedef struct Pjoin{
-	TCB_t* waiting;
-	TCB_t* awaited;
-} Pjoin;
-
-
 int cinit(void);
 void endThread(void);
 void insertThreadToFila(int prio, void * thread);
 int generateTID(void);
-
 int scheduler(void);
 int dispatcher(TCB_t *nextRunningThread);
 
