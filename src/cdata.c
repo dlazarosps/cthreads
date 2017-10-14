@@ -8,6 +8,12 @@
 #include "cthread.h"
 #include "support.h"
 
+
+static int globalTID = 0;
+
+/**
+	Função de inicialização da control.
+*/
 int cinit(void) {
   int check;
 
@@ -61,6 +67,7 @@ int cinit(void) {
   return 0;
 };
 
+
 void endThread(void){
 	getcontext(&controlBlock.endThread);
 
@@ -77,6 +84,12 @@ void endThread(void){
 	scheduler();
 }
 
+
+/**
+	Função que insere uma thread na fila de acordo com a prioridade.
+	Quanto maior o tempo que uma thread manter no estado "executando", menor será 
+	a prioridade dela. E quanto menor, o contrário.
+*/
 void insertThreadToFila(int prio, void * thread) {
   int finished = FALSE;
   TCB_t* node;
@@ -111,14 +124,21 @@ void insertThreadToFila(int prio, void * thread) {
 }
 
 
+/**
+	Função para gerar um TID a uma thread. Cada thread deverá ser associada a 
+	um identificador único (TID – thread identifier) que será um número inteiro 
+	positivo (com sinal), de 32 bits (int).
+	
+*/
 int generateTID(void) {
-  /*TO DO */
-  //verificar a unicidade dos TIDs criados
-	static int globalTID = 0;
-
 	return ++globalTID;
 }
 
+
+/**
+	Função que seleciona na fila de threads a proxima thread a ser executada.
+	
+*/
 int scheduler(void) {
   TCB_t* nextRunningThread;
 
@@ -134,6 +154,12 @@ int scheduler(void) {
   return 0;
 }
 
+
+/**
+	Função que executa a troca de contexto. Salva o tempo de inicio da thread que entra
+	em execução, e altera o valor da prioridade da thread ao sair da execução.
+	
+*/
 int dispatcher(TCB_t* nextRunningThread){
   TCB_t* currentThread = controlBlock.runningThread;
   currentThread->state = PROCST_APTO;
