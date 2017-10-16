@@ -111,7 +111,7 @@ int cyield(void) {
 	de um estado zombie, pois a thread que aguarda o término de outra (a que fez cjoin) não recupera nenhuma
 	informação de retorno proveniente da thread aguardada.
 	
-	@param tid Identificador da Thread que está aguardando seu término
+	@param tid Identificador da Thread que o término está sendo aguardado
 	@return Retorna ZERO quando executado corretamente. E valor negativo caso 
 	contrário.
 
@@ -120,14 +120,34 @@ int cjoin(int tid) {
   if (!controlBlock.initiated) {
     cinit();
   }
+	  
+  /* se a thread procurada esta sendo executada */
+  if (controlBlock.runningThread->tid == tid) {
+    return -1;
+  }
+  
+  /* Verifica se a thread existe */
+  if(searchFILA2(controlBlock.allThreads, tid, TRUE) == FALSE){
+	 return -1; 
+  }
 
-  /*TO DO*/
-  //Código e lógica de implementação correta
+  TCB_t* waitThread;
+  waitThread = (TCB_t*) GetAtIteratorFila2(&controlBlock.allThreads);
+  
+  /* Se já existe uma thread aguardando o seu término */
+  if( waitThread->tidJoinWait >= 0 ){
+	 return -1; 
+  }
+  
+  /* sinaliza que existe uma Thread esperando pelo termino dela */
+  waitThread->joinWait == controlBlock.runningThread->tid;
+  
+  RunningThread->state = PROCST_BLOQ;  
   
   /* troca de contexto */
   scheduler();
 
-  return 0;
+  return 1;
 };
 
 
@@ -153,9 +173,8 @@ int csem_init(csem_t *sem, int count) {
   }
 
   sem->count = count;
-  sem->fila = (PFILA2) malloc(sizeof(PFILA2));
 
-  if (CreateFila2(sem->fila) == 0) {
+  if (initFILA2(sem->fila, TRUE)) {
     return 0;
   } else {
     return -1;
