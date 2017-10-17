@@ -29,7 +29,7 @@ typedef struct s_TCB {
 	ucontext_t 	context;	// contexto de execução da thread (SP, PC, GPRs e recursos) 
 	
 	/* Se necessário, pode-se acresecentar campos nessa estrutura A PARTIR DAQUI! */
-	int		tidJoinWait = -1;  //-1: nenhuma Thread esperando o seu termino | Qualquer outro valor positivo: possui Thread esperando seu término
+	// int		tidJoinWait = -1;  //-1: nenhuma Thread esperando o seu termino | Qualquer outro valor positivo: possui Thread esperando seu término
 	
 } TCB_t; 
 

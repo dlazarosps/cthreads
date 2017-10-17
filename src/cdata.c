@@ -92,34 +92,42 @@ void endThread(void){
 */
 void insertThreadToFila(int prio, void * thread) {
   int finished = FALSE;
+  int status = 0;
   TCB_t* node;
   TCB_t* nextnode;
 
-  PFILA2 fila = controlBlock.aptoThreads;
-  FirstFila2(fila);
+  // PFILA2 fila = controlBlock.aptoThreads;
+  FirstFila2(controlBlock.aptoThreads);
 
   do {
-    node = (TCB_t*) GetAtIteratorFila2(fila);
+    node = (TCB_t*) GetAtIteratorFila2(controlBlock.aptoThreads);
     if (node == NULL) //fila vazia
     {
-      insertFILA2(fila, (void*) thread);
+      insertFILA2((PFILA2) &controlBlock.aptoThreads, thread);
       finished = TRUE;
     }
     else{
       if(node->prio <= prio)
       {
-        nextnode = (TCB_t*) GetAtNextIteratorFila2(fila);
+        nextnode = (TCB_t*) GetAtNextIteratorFila2(controlBlock.aptoThreads);
         if(nextnode->prio > prio){
-          insertBeforeFILA2(fila, (void*) thread);
+          insertBeforeFILA2((PFILA2) &controlBlock.aptoThreads, thread);
           finished = TRUE;
         }
       }
       else{
-        insertBeforeFILA2(fila, (void*) thread);
+        insertBeforeFILA2((PFILA2) &controlBlock.aptoThreads, thread);
         finished = TRUE;
       }
     }
 
+    status = NextFila2(controlBlock.aptoThreads);
+    
+    if (status != 0)
+    {
+      finished = TRUE;
+    }
+    
   } while(!finished);
 }
 

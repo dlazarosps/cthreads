@@ -20,19 +20,23 @@ int main() {
   struct control controlBlock = { .initiated = FALSE };
   TCB_t *thread0, *thread1, *thread2, *thread3;
 
-	int searchTID[6] = { 0, 1, 5, 100, 2, 3 };
+	int searchTID[6] = { 0, 1, 2, 3, 4, 5 };
 	cinit();
 	PFILA2 allThreads = &controlBlock.allThreads;
 
 	// Inicializando threads
   thread0 = (TCB_t*) malloc(sizeof(TCB_t));
   thread0->tid = 0;
+  thread0->prio = 1;
   thread1 = (TCB_t*) malloc(sizeof(TCB_t));
-  thread1->tid = searchTID[5];
+  thread1->tid = searchTID[1];
+  thread1->prio = 3;
   thread2 = (TCB_t*) malloc(sizeof(TCB_t));
-  thread2->tid = searchTID[3];
+  thread2->tid = searchTID[2];
+  thread2->prio = 2;
   thread3 = (TCB_t*) malloc(sizeof(TCB_t));
-  thread3->tid = searchTID[2];
+  thread3->tid = searchTID[3];
+  thread0->prio = 4;
 
   // Inserção na fila
   insertFILA2(allThreads, (void *) thread0);
@@ -44,6 +48,7 @@ int main() {
 	printf("Efetuando buscas por TID.\n");
 	searchArrayTID(allThreads, searchTID, 6);
 
+	/*
 	// Remoção de elemento da fila
 	removeFILA2(allThreads, searchTID[5]);
 	removeFILA2(allThreads, searchTID[2]);
@@ -59,6 +64,41 @@ int main() {
 	// Pesquisa usando os mesmos TIDs anteriores.
 	printf("\nElementos TID %d e TID %d reinseridos. Efetuando busca...\n", searchTID[5], searchTID[2]);
 	searchArrayTID(allThreads, searchTID, 6);
+	*/
+
+	printf("\n --------------------------- \n");
+	printf("\n ---Testando Fila de Aptas--- \n");
+	printf("\n --------------------------- \n");
+	
+	printf("\n -----0|1--1|3--2|2--3|4----- \n");
+
+	insertThreadToFila(thread0->prio, (void *) thread0);
+	// insertThreadToFila(thread1->prio, thread1);
+	// insertThreadToFila(thread2->prio, thread2);
+	// insertThreadToFila(thread3->prio, thread3);
+
+	TCB_t* testeThread;
+
+	if (FirstFila2((PFILA2) &controlBlock.aptoThreads) == 0) {
+    	
+    	//Primeira thread
+    	testeThread = (TCB_t*) GetAtIteratorFila2((PFILA2) &controlBlock.aptoThreads);
+    	printf("TID %d - Prio %d \n",testeThread->tid, testeThread->prio);
+
+    	/*//segunda thread
+    	testeThread = (TCB_t*) GetAtNextIteratorFila2((PFILA2) &controlBlock.aptoThreads);
+    	printf("TID %d - Prio %d \n",testeThread->tid, testeThread->prio);
+
+    	//ultima thread
+    	if (LastFila2((PFILA2) &controlBlock.aptoThreads) == 0) {
+
+			testeThread = (TCB_t*) GetAtIteratorFila2((PFILA2) &controlBlock.aptoThreads);
+    		printf("TID %d - Prio %d \n",testeThread->tid, testeThread->prio);    	
+		}*/
+	}
+
+
+
 
   return 0;
 }

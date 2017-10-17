@@ -121,12 +121,13 @@ int cjoin(int tid) {
     cinit();
   }
 	  
-  /* se a thread procurada esta sendo executada */
+  /* 
+  //se a thread procurada esta sendo executada
   if (controlBlock.runningThread->tid == tid) {
     return -1;
   }
   
-  /* Verifica se a thread existe */
+  // Verifica se a thread existe
   if(searchFILA2(controlBlock.allThreads, tid, TRUE) == FALSE){
 	 return -1; 
   }
@@ -134,20 +135,21 @@ int cjoin(int tid) {
   TCB_t* waitThread;
   waitThread = (TCB_t*) GetAtIteratorFila2(&controlBlock.allThreads);
   
-  /* Se já existe uma thread aguardando o seu término */
+  //Se já existe uma thread aguardando o seu término
   if( waitThread->tidJoinWait >= 0 ){
 	 return -1; 
   }
   
-  /* sinaliza que existe uma Thread esperando pelo termino dela */
+  // sinaliza que existe uma Thread esperando pelo termino dela
   waitThread->joinWait == controlBlock.runningThread->tid;
   
-  RunningThread->state = PROCST_BLOQ;  
+  controlBlock.runningThread->state = PROCST_BLOQ;  
   
-  /* troca de contexto */
+  // troca de  threads / contexto
   scheduler();
 
-  return 1;
+  */
+  return -1;
 };
 
 
