@@ -21,7 +21,9 @@ int main() {
   TCB_t *thread0, *thread1, *thread2, *thread3;
 
 	int searchTID[6] = { 0, 1, 2, 3, 4, 5 };
-	cinit();
+	
+	printf("\t \t CINIT = %d \n", cinit());
+
 	PFILA2 allThreads = &controlBlock.allThreads;
 
 	// Inicializando threads
@@ -72,7 +74,13 @@ int main() {
 	
 	printf("\n -----0|1--1|3--2|2--3|4----- \n");
 
-	insertThreadToFila(thread0->prio, (void *) thread0);
+	if(insertThreadToFila(thread0->prio, (void *) thread0) == 1){
+		printf("\t Primeira Thread inserida no inicio \n");
+	}
+/*	
+	if(insertThreadToFila(thread1->prio, (void *) thread1) == 2){
+		printf("\t Segunda Thread inserida (apos o laço) \n");
+	}*/
 	// insertThreadToFila(thread1->prio, thread1);
 	// insertThreadToFila(thread2->prio, thread2);
 	// insertThreadToFila(thread3->prio, thread3);
@@ -83,7 +91,7 @@ int main() {
     	
     	//Primeira thread
     	testeThread = (TCB_t*) GetAtIteratorFila2((PFILA2) &controlBlock.aptoThreads);
-    	printf("TID %d - Prio %d \n",testeThread->tid, testeThread->prio);
+    	printf("TID %d - Prio %d \n", testeThread, testeThread->tid, testeThread->prio);
 
     	/*//segunda thread
     	testeThread = (TCB_t*) GetAtNextIteratorFila2((PFILA2) &controlBlock.aptoThreads);
@@ -96,6 +104,13 @@ int main() {
     		printf("TID %d - Prio %d \n",testeThread->tid, testeThread->prio);    	
 		}*/
 	}
+	else{
+		printf("\n ERRO ao pegar o First Apto \n");
+	}
+
+	printf("\n --------------------------- \n");
+	printf("\n Efetuando buscas por TID APTOS.\n");
+	searchArrayTID(&controlBlock.aptoThreads, searchTID, 6);
 
 
 

@@ -29,7 +29,11 @@ typedef struct s_TCB {
 	ucontext_t 	context;	// contexto de execução da thread (SP, PC, GPRs e recursos) 
 	
 	/* Se necessário, pode-se acresecentar campos nessa estrutura A PARTIR DAQUI! */
-	// int		tidJoinWait = -1;  //-1: nenhuma Thread esperando o seu termino | Qualquer outro valor positivo: possui Thread esperando seu término
+	
+	// apresenta warning/erro ao inicializar a variavel com valor direto na struct
+	// setar valor via create
+		//-1: nenhuma Thread esperando o seu termino | Qualquer outro valor positivo: possui Thread esperando seu término
+		// int		tidJoinWait = -1;  
 	
 } TCB_t; 
 
@@ -50,13 +54,15 @@ struct control {
 	
 	TCB_t* runningThread;
 	ucontext_t endThread;
+
+	//flag dispatcher action
 };
 
 extern struct control controlBlock;
 
 int cinit(void);
 void endThread(void);
-void insertThreadToFila(int prio, void * thread);
+int insertThreadToFila(int prio, void * thread);
 int generateTID(void);
 int scheduler(void);
 int dispatcher(TCB_t *nextRunningThread);

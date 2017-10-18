@@ -143,6 +143,8 @@ int cjoin(int tid) {
   // sinaliza que existe uma Thread esperando pelo termino dela
   waitThread->joinWait == controlBlock.runningThread->tid;
   
+  
+  //precisa de uma flag para avisar o dispatcher na hora de trocar as threads
   controlBlock.runningThread->state = PROCST_BLOQ;  
   
   // troca de  threads / contexto

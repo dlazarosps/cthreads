@@ -90,45 +90,76 @@ void endThread(void){
 	Quanto maior o tempo que uma thread manter no estado "executando", menor será 
 	a prioridade dela. E quanto menor, o contrário.
 */
-void insertThreadToFila(int prio, void * thread) {
+int insertThreadToFila(int prio, void * thread) {
   int finished = FALSE;
   int status = 0;
   TCB_t* node;
   TCB_t* nextnode;
 
   // PFILA2 fila = controlBlock.aptoThreads;
-  FirstFila2(controlBlock.aptoThreads);
+  if(FirstFila2((PFILA2) &controlBlock.aptoThreads) != 0){ 
+    insertFILA2((PFILA2) &controlBlock.aptoThreads, thread);
+    return 1;
+  }
 
-  do {
-    node = (TCB_t*) GetAtIteratorFila2(controlBlock.aptoThreads);
-    if (node == NULL) //fila vazia
-    {
-      insertFILA2((PFILA2) &controlBlock.aptoThreads, thread);
-      finished = TRUE;
+/* //teste insert step by step
+  if(FirstFila2((PFILA2) &controlBlock.aptoThreads) != 0){ 
+    //fila vazia
+    if(AppendFila2((PFILA2) &controlBlock.aptoThreads, thread) == 0){
+      
+      if(FirstFila2((PFILA2) &controlBlock.aptoThreads) == 0){
+        finished = TRUE;
+
+        return 1;  
+      }
     }
-    else{
-      if(node->prio <= prio)
+
+    return -1;
+    
+  }
+*/
+  else{
+
+    do {
+
+      node = (TCB_t*) GetAtIteratorFila2((PFILA2) &controlBlock.aptoThreads);
+      
+      if (node == NULL) //fila vazia
       {
-        nextnode = (TCB_t*) GetAtNextIteratorFila2(controlBlock.aptoThreads);
-        if(nextnode->prio > prio){
+        
+        insertFILA2((PFILA2) &controlBlock.aptoThreads, thread);
+        finished = TRUE;
+      }
+      else{
+        
+        if(node->prio <= prio)
+        {
+          nextnode = (TCB_t*) GetAtNextIteratorFila2(controlBlock.aptoThreads);
+          if(nextnode->prio > prio){
+            insertBeforeFILA2((PFILA2) &controlBlock.aptoThreads, thread);
+            finished = TRUE;
+          }
+        }
+        else{
           insertBeforeFILA2((PFILA2) &controlBlock.aptoThreads, thread);
           finished = TRUE;
         }
       }
-      else{
-        insertBeforeFILA2((PFILA2) &controlBlock.aptoThreads, thread);
+
+      status = NextFila2((PFILA2) &controlBlock.aptoThreads);
+      
+      if (status == 3) //final da fila
+      {
+        insertFILA2((PFILA2) &controlBlock.aptoThreads, thread);
         finished = TRUE;
       }
-    }
 
-    status = NextFila2(controlBlock.aptoThreads);
-    
-    if (status != 0)
-    {
-      finished = TRUE;
-    }
-    
-  } while(!finished);
+    } while(!finished);
+  }  
+
+
+  return 2;
+  
 }
 
 
@@ -173,7 +204,12 @@ int dispatcher(TCB_t* nextRunningThread){
   currentThread->state = PROCST_APTO;
 
   /*TO DO*/
-  //falta validar quando for a primeira vez que está rodando  
+  //falta validar com alguma flag do control
+    /* swith case 
+       case (first)
+       case (cjoin -> dispatcher)
+       default (run <-> next)
+    */   
   currentThread->prio = currentThread->prio + stopTimer(); 
   insertThreadToFila(currentThread->prio, (void *) currentThread);
 
