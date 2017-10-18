@@ -28,12 +28,12 @@ int ccreate (void* (*start)(void*), void *arg, int prio) {
     cinit();
   }
 
-  TCB_t* newThread;
+  TCB_t* newThread; // Alocação para a criação de uma nova thread.
   newThread = (TCB_t*) malloc(sizeof(TCB_t));
-  newThread->tid = generateTID();
-  newThread->state = PROCST_APTO;
-  newThread->prio = prio;
-  newThread->tidJoinWait = -1;
+  newThread->tid = generateTID(); // Gera um TID exclusivo a thread
+  newThread->state = PROCST_APTO; // Coloca um estado a thread
+  newThread->prio = prio; // Prioridade da thread.
+  newThread->tidJoinWait = -1; 
 
   getcontext(&newThread->context);
 
@@ -47,9 +47,13 @@ int ccreate (void* (*start)(void*), void *arg, int prio) {
 
   makecontext(&newThread->context, (void(*))start, 1, arg);
 
+  //Insere a nova thread na fila de todas as threads
   insertFILA2(&controlBlock.allThreads, (void *) newThread);
+  
+  //Insere a nova thread na fila de aptos de acordo com sua prioridade
   insertThreadToFila(prio, (void *) newThread);
 
+  //Retorno do TID da thread recem gerada.
   return newThread->tid;
 };
 
@@ -91,10 +95,16 @@ int cyield(void) {
     cinit();
   }
 
+  //Recebe da control a thread corrente.
   TCB_t* lastRunningThread = controlBlock.runningThread;
+  
+  //Coloca esta thread no estado de APTO.
   lastRunningThread->state = PROCST_APTO;
 
+  //Insere novamente a thread a fila de aptos de acordo com sua prioridade.
   insertThreadToFila(lastRunningThread->prio, lastRunningThread);
+  
+  //Seleciona a próxima thread a ser executada.
   scheduler();
 
   return 0;
@@ -202,17 +212,20 @@ int cwait(csem_t *sem) {
     cinit();
   }
 
+  // Recebe a thread corrente da control.
   TCB_t* RunningThread = controlBlock.runningThread;
 
+  // Verifica o valor de count. Se menor, a thread é bloqueada e colocada na fila 
+  // de semaforos.
   if(sem->count > 0){
     sem->count = 0;
     return 0;
   }
   else{
         if(AppendFila2(sem->fila, (void *) RunningThread)==0){
-            sem->count--;
-            RunningThread->state = PROCST_BLOQ;
-            scheduler();
+            sem->count--; //Variável count cai uma unidade.
+            RunningThread->state = PROCST_BLOQ; // Altera seu estado para BLOQUEADO.
+            scheduler(); // Seleciona a próxima thread a ser executada.
             return 0;
         }
   }
@@ -246,9 +259,9 @@ int csignal(csem_t *sem) {
     if (aux==NULL){
         return -1;
     }
-    DeleteAtIteratorFila2(sem->fila);
-    aux->state = PROCST_APTO;
-    insertThreadToFila(aux->prio, (void *) aux);
+    DeleteAtIteratorFila2(sem->fila); // Tira a thread da fila de semaforo.
+    aux->state = PROCST_APTO;	// Coloca a thread no estado de APTO.
+    insertThreadToFila(aux->prio, (void *) aux); // Insere a thread na fila de APTOS de acordo com a prioridade.
     return 0;
   }
 };

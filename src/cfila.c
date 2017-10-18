@@ -12,6 +12,10 @@
 #include "cthread.h"
 #include "support.h"
 
+
+/**
+	Cria uma estrutura de dados do tipo FILA.
+*/
 int initFILA2(PFILA2 fila, int isPointer) {
   if(isPointer) {
     fila = (PFILA2) malloc(sizeof(PFILA2));
@@ -28,6 +32,10 @@ int initFILA2(PFILA2 fila, int isPointer) {
   return FALSE;
 }
 
+/**
+	Insere um elemento ao final da fila. E aponta ao primeiro elemento 
+	após a inserção.
+*/
 void insertFILA2(PFILA2 fila, void* element) {
   AppendFila2(fila, element);
   FirstFila2(fila);
@@ -35,12 +43,22 @@ void insertFILA2(PFILA2 fila, void* element) {
   return;
 }
 
+/**
+	Insere um elemento depois do elemento apontado por "fila".
+	Aponta ao primeiro elemento após a inserção.
+*/
 void insertAfterFILA2(PFILA2 fila, void* element) {
   InsertAfterIteratorFila2(fila, element);
   FirstFila2(fila);
 
   return;
 }
+
+
+/**
+	Insere um elemento antes do elemento apontado por "fila".
+	Aponta ao primeiro elemento após a inserção.
+*/
 void insertBeforeFILA2(PFILA2 fila, void* element) {
   InsertBeforeIteratorFila2(fila, element);
   FirstFila2(fila);
@@ -48,6 +66,10 @@ void insertBeforeFILA2(PFILA2 fila, void* element) {
   return;
 }
 
+
+/**
+	Busca um elemento na fila.
+*/
 int searchFILA2(PFILA2 fila, int tid, int resetIterator) {
   int found = FALSE;
   int finished = FALSE;
@@ -103,6 +125,10 @@ int searchFILA2(PFILA2 fila, int tid, int resetIterator) {
   return status;
 }
 
+
+/**
+	Remove um elemento de fila a partir do tid.
+*/
 int removeFILA2(PFILA2 fila, int tid) {
   int found = searchFILA2(fila, tid, TRUE);
 
