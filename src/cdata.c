@@ -201,20 +201,30 @@ int scheduler(void) {
 */
 int dispatcher(TCB_t* nextRunningThread){
   TCB_t* currentThread = controlBlock.runningThread;
-  currentThread->state = PROCST_APTO;
-
+  
   /*TO DO*/
   //falta validar com alguma flag do control
-    /* swith case 
-       case (first)
-       case (cjoin -> dispatcher)
-       default (run <-> next)
+    /* case (first): da forma como esta agora teoricamente apenas falta garantir que não é a primeira
+				talvez seja possivel só verificar se tem algo rodando no runningthread e pular direto para a ultima parte.
     */   
-  currentThread->prio = currentThread->prio + stopTimer(); 
-  insertThreadToFila(currentThread->prio, (void *) currentThread);
+
+  /* controle para:
+	- não alterar o valor da prioridade incorretamente
+	- e inserir na fila correta 
+	*/
+  if(currentThread->state == PROCST_APTO || currentThread->state == PROCST_EXEC){
+	  currentThread->state = PROCST_APTO;
+	  currentThread->prio = currentThread->prio + stopTimer(); 
+	  insertThreadToFila(currentThread->prio, (void *) currentThread);
+  }
+  
+  /* Caso a thread esteja foi bloqueda nãoa ltera sua prio e insere na fila de bloqueadas */
+  if(currentThread->state == PROCST_BLOQ){
+	  currentThread->prio = currentThread->prio + stopTimer(); 
+	  insertFILA2(controlBlock.blockedThreads, (void *) currentThread);
+  }
 
   controlBlock.runningThread = nextRunningThread;
-
   swapcontext(&currentThread->context, &nextRunningThread->context);
   startTimer();
 	return 0;

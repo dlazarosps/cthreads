@@ -33,6 +33,7 @@ int ccreate (void* (*start)(void*), void *arg, int prio) {
   newThread->tid = generateTID();
   newThread->state = PROCST_APTO;
   newThread->prio = prio;
+  newThread->tidJoinWait = -1;
 
   getcontext(&newThread->context);
 
@@ -121,14 +122,13 @@ int cjoin(int tid) {
     cinit();
   }
 	  
-  /* 
   //se a thread procurada esta sendo executada
   if (controlBlock.runningThread->tid == tid) {
     return -1;
   }
   
   // Verifica se a thread existe
-  if(searchFILA2(controlBlock.allThreads, tid, TRUE) == FALSE){
+  if(searchFILA2(&controlBlock.allThreads, tid, TRUE) == FALSE){
 	 return -1; 
   }
 
@@ -141,7 +141,7 @@ int cjoin(int tid) {
   }
   
   // sinaliza que existe uma Thread esperando pelo termino dela
-  waitThread->joinWait == controlBlock.runningThread->tid;
+  waitThread->tidJoinWait = controlBlock.runningThread->tid;
   
   
   //precisa de uma flag para avisar o dispatcher na hora de trocar as threads
@@ -149,8 +149,6 @@ int cjoin(int tid) {
   
   // troca de  threads / contexto
   scheduler();
-
-  */
   return -1;
 };
 

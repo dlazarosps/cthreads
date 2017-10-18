@@ -20,7 +20,7 @@ TST_DIR=./exemplos
 TST_PRG=exemplo
 
 all: clear $(BIN_DIR)/cdata.o $(BIN_DIR)/cthread.o $(BIN_DIR)/cfila.o $(BIN_DIR)/support.o
-	ar rcs $(LIB_DIR)/libcthread.a $(BIN_DIR)/cdata.o $(BIN_DIR)/cthread.o $(BIN_DIR)/cfila.o $(BIN_DIR)/support.o
+	ar crs $(LIB_DIR)/libcthread.a $(BIN_DIR)/cdata.o $(BIN_DIR)/cthread.o $(BIN_DIR)/cfila.o $(BIN_DIR)/support.o
 
 $(BIN_DIR)/cdata.o: $(SRC_DIR)/cdata.c
 	$(CC) $(CFLAGS) -c -o $(BIN_DIR)/cdata.o -I$(INC_DIR) $(SRC_DIR)/cdata.c
