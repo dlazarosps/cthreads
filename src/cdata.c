@@ -24,10 +24,10 @@ int cinit(void) {
   check = initFILA2(&controlBlock.allThreads, FALSE);
   if(!check) return -1;
 
-  check = initFILA2((PFILA2) &controlBlock.aptoThreads, TRUE);
+  check = initFILA2(controlBlock.aptoThreads, TRUE);
   if(!check) return -2;
 
-  check = initFILA2((PFILA2) &controlBlock.blockedThreads, TRUE);
+  check = initFILA2(controlBlock.blockedThreads, TRUE);
   if(!check) return -3;
 
 
@@ -228,4 +228,29 @@ int dispatcher(TCB_t* nextRunningThread){
   swapcontext(&currentThread->context, &nextRunningThread->context);
   startTimer();
 	return 0;
+}
+
+//Copiada da /src/insert.c
+/*--------------------------------------------------------------------
+Função: Insere um nodo na lista indicada, segundo o campo "prio" do TCB_t
+  A fila deve estar ordenada (ou ter sido construída usado apenas essa funcao)
+  O primeiro elemento da lista (first) é aquele com menor vamor de "prio"
+Entra:  pfila -> objeto FILA2
+  pnodo -> objeto a ser colocado na FILA2
+Ret:  ==0, se conseguiu
+  !=0, caso contrário (erro)
+--------------------------------------------------------------------*/
+int insertByPrio(PFILA2 pfila, TCB_t *tcb) {
+  TCB_t *tcb_it;
+  
+  // pfile vazia?
+  if (FirstFila2(pfila)==0) {
+    do {
+      tcb_it = (TCB_t *) GetAtIteratorFila2(pfila);
+      if (tcb->prio < tcb_it->prio) {
+        return InsertBeforeIteratorFila2(pfila, tcb);
+      }
+    } while (NextFila2(pfila)==0);
+  } 
+  return AppendFila2(pfila, (void *)tcb);
 }

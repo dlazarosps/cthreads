@@ -67,4 +67,6 @@ int generateTID(void);
 int scheduler(void);
 int dispatcher(TCB_t *nextRunningThread);
 
+int insertByPrio(PFILA2 pfila, TCB_t *tcb);
+
 #endif
