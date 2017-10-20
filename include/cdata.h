@@ -30,10 +30,7 @@ typedef struct s_TCB {
 	
 	/* Se necessário, pode-se acresecentar campos nessa estrutura A PARTIR DAQUI! */
 	
-	// apresenta warning/erro ao inicializar a variavel com valor direto na struct
-	// setar valor via create
-		//-1: nenhuma Thread esperando o seu termino | Qualquer outro valor positivo: possui Thread esperando seu término
-	int		tidJoinWait;  
+	int		tidJoinWait;  //-1: nenhuma Thread esperando o seu termino | Qualquer outro valor positivo: possui Thread esperando seu término
 	
 } TCB_t; 
 

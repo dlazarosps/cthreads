@@ -81,25 +81,27 @@ void endThread(void){
 	#endif
 
   // Verifica a thread bloqueada que estava esperando a thread que terminou
-  TCB_t* unblocked; 
-  
-  if (FirstFila2((PFILA2) &controlBlock.blockedThreads)==0) {
-    do{
-        
-      unblocked = (TCB_t *) GetAtIteratorFila2((PFILA2) &controlBlock.blockedThreads);  
-        
-      //Caso o tidjoin for igual ao tid da thread que terminou desbloqueia
-      if (unblocked->tidJoinWait == controlBlock.runningThread->tid) {
+  if (controlBlock.runningThread->tidJoinWait >= 0){
+	TCB_t* unblocked; 
+	  
+	  if (FirstFila2((PFILA2) &controlBlock.blockedThreads)==0) {
+	    do{
+		
+	      unblocked = (TCB_t *) GetAtIteratorFila2((PFILA2) &controlBlock.blockedThreads);  
+		
+	      //Caso o tidjoin for igual ao tid da thread que terminou desbloqueia
+	      if (unblocked->tid == controlBlock.runningThread->tidJoinWait) {
 		if(DeleteAtIteratorFila2((PFILA2) &controlBlock.blockedThreads)== 0){ //Remove da fila de Blocked
 			unblocked->prio = PROCST_APTO;
 			insertByPrio((PFILA2) &controlBlock.aptoThreads, unblocked); //Adiciona na fila de APTO
 		}
-      }
-    }
-    while (NextFila2((PFILA2) &controlBlock.blockedThreads)==0);
+	      }
+	    }
+	    while (NextFila2((PFILA2) &controlBlock.blockedThreads)==0);
+	  }
   }
     //Põe a rodar a proxima thread
-  	scheduler();
+	scheduler();
 }
 
 
@@ -173,7 +175,7 @@ int dispatcher(TCB_t* nextRunningThread){
     // Caso a thread esteja foi bloqueda insere na fila de bloqueadas
     if(currentThread->state == PROCST_BLOQ){
 
-      insertFILA2(controlBlock.blockedThreads, (void *) currentThread);
+      insertFILA2((PFILA2) &controlBlock.blockedThreads, (void *) currentThread);
 
     }  
   }
