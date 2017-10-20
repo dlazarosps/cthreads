@@ -12,7 +12,7 @@
 static int globalTID = 0;
 
 /**
-	Função de inicialização da control.
+  Função de inicialização da control.
 */
 int cinit(void) {
   int check;
@@ -21,6 +21,8 @@ int cinit(void) {
     Initiate control block elements
   */
   controlBlock.initiated = TRUE;
+  controlBlock.isfirst = TRUE;
+
   check = initFILA2(&controlBlock.allThreads, FALSE);
   if(!check) return -1;
 
@@ -69,7 +71,7 @@ int cinit(void) {
 
 
 void endThread(void){
-	getcontext(&controlBlock.endThread);
+  getcontext(&controlBlock.endThread);
 
   // Delete thread from blocking threads
 
@@ -123,31 +125,49 @@ int scheduler(void) {
 int dispatcher(TCB_t* nextRunningThread){
   TCB_t* currentThread = controlBlock.runningThread;
 
-  /*TO DO*/
-  //falta validar com alguma flag do control
-    /* case (first): da forma como esta agora teoricamente apenas falta garantir que não é a primeira
-				talvez seja possivel só verificar se tem algo rodando no runningthread e pular direto para a ultima parte.
+  /*Caso dispatcher esteja rodando pela primeira vez */
+  if (controlBlock.isfirst == TRUE){
+
+    currentThread->state = PROCST_APTO;
+    currentThread->prio = currentThread->prio+1;
+    insertByPrio((PFILA2) &controlBlock.aptoThreads, currentThread);
+    
+    //Desativa flag
+    controlBlock.isfirst = FALSE;
+
+  }
+  else{
+    /* controle para:
+    - não alterar o valor da prioridade incorretamente
+    - e inserir na fila correta
     */
 
-  /* controle para:
-	- não alterar o valor da prioridade incorretamente
-	- e inserir na fila correta
-	*/
-  if(currentThread->state == PROCST_APTO || currentThread->state == PROCST_EXEC){
-	  currentThread->state = PROCST_APTO;
-	  currentThread->prio = currentThread->prio + stopTimer();
-	  insertByPrio((PFILA2) &controlBlock.aptoThreads, currentThread);
+    //Altera a prioridade da thread
+    currentThread->prio = currentThread->prio + stopTimer();
+    
+    //Caso a thread esteja é apta ou estava executando insere na fila de aptas
+    if(currentThread->state == PROCST_APTO || currentThread->state == PROCST_EXEC){
+
+      currentThread->state = PROCST_APTO;
+      insertByPrio((PFILA2) &controlBlock.aptoThreads, currentThread);
+
+    }
+
+    // Caso a thread esteja foi bloqueda insere na fila de bloqueadas
+    if(currentThread->state == PROCST_BLOQ){
+
+      insertFILA2(controlBlock.blockedThreads, (void *) currentThread);
+
+    }  
   }
 
-  /* Caso a thread esteja foi bloqueda nãoa ltera sua prio e insere na fila de bloqueadas */
-  if(currentThread->state == PROCST_BLOQ){
-	  currentThread->prio = currentThread->prio + stopTimer();
-	  insertFILA2(controlBlock.blockedThreads, (void *) currentThread);
-  }
-
+  //efetua a troca de contexto running <-> next
   controlBlock.runningThread = nextRunningThread;
   swapcontext(&currentThread->context, &nextRunningThread->context);
+
+  //inicia o timer da prioridade
   startTimer();
+
 	return 0;
 }
 
