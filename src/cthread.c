@@ -124,19 +124,35 @@ int cjoin(int tid) {
   if (!controlBlock.initiated) {
     cinit();
   }
-	  
+  
+  int found = FALSE;
+  
   //se a thread procurada esta sendo executada
   if (controlBlock.runningThread->tid == tid) {
     return -1;
   }
   
-  // Verifica se a thread existe
-  if(searchFILA2(&controlBlock.allThreads, tid, TRUE) == FALSE){
-	 return -1; 
-  }
-
   TCB_t* waitThread;
-  waitThread = (TCB_t*) GetAtIteratorFila2((PFILA2) &controlBlock.allThreads);
+  // Verifica se a thread existe
+  if (FirstFila2((PFILA2) &controlBlock.aptoThreads)==0) {
+    do {
+      waitThread = (TCB_t *) GetAtIteratorFila2((PFILA2) &controlBlock.aptoThreads);
+      if (tid == waitThread->tid) {
+        found = TRUE;
+      }
+    } while (NextFila2((PFILA2) &controlBlock.aptoThreads)==0 && found == FALSE);
+  }
+  
+  if (FirstFila2((PFILA2) &controlBlock.blockedThreads)==0) {
+    do {
+      waitThread = (TCB_t *) GetAtIteratorFila2((PFILA2) &controlBlock.blockedThreads);
+      if (tid == waitThread->tid) {
+        found = TRUE;
+      }
+    } while (NextFila2((PFILA2) &controlBlock.blockedThreads)==0 && found == FALSE);
+  }
+  
+  if(found == FALSE) return -1;
   
   //Se já existe uma thread aguardando o seu término
   if( waitThread->tidJoinWait >= 0 ){
