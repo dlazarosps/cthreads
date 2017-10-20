@@ -84,85 +84,6 @@ void endThread(void){
 	scheduler();
 }
 
-
-/**
-	Função que insere uma thread na fila de acordo com a prioridade.
-	Quanto maior o tempo que uma thread manter no estado "executando", menor será
-	a prioridade dela. E quanto menor, o contrário.
-*/
-int insertThreadToFila(int prio, void * thread) {
-  int finished = FALSE;
-  int status = 0;
-  TCB_t* node;
-  TCB_t* nextnode;
-
-  // PFILA2 fila = controlBlock.aptoThreads;
-  if(FirstFila2((PFILA2) &controlBlock.aptoThreads) != 0){
-    insertFILA2((PFILA2) &controlBlock.aptoThreads, thread);
-    return 1;
-  }
-
-/* //teste insert step by step
-  if(FirstFila2((PFILA2) &controlBlock.aptoThreads) != 0){
-    //fila vazia
-    if(AppendFila2((PFILA2) &controlBlock.aptoThreads, thread) == 0){
-
-      if(FirstFila2((PFILA2) &controlBlock.aptoThreads) == 0){
-        finished = TRUE;
-
-        return 1;
-      }
-    }
-
-    return -1;
-
-  }
-*/
-  else{
-
-    do {
-
-      node = (TCB_t*) GetAtIteratorFila2((PFILA2) &controlBlock.aptoThreads);
-
-      if (node == NULL) //fila vazia
-      {
-
-        insertFILA2((PFILA2) &controlBlock.aptoThreads, thread);
-        finished = TRUE;
-      }
-      else{
-
-        if(node->prio <= prio)
-        {
-          nextnode = (TCB_t*) GetAtNextIteratorFila2((PFILA2) &controlBlock.aptoThreads);
-          if(nextnode->prio > prio){
-            // insertBeforeFILA2((PFILA2) &controlBlock.aptoThreads, thread);
-            finished = TRUE;
-          }
-        }
-        else{
-          // insertBeforeFILA2((PFILA2) &controlBlock.aptoThreads, thread);
-          finished = TRUE;
-        }
-      }
-
-      status = NextFila2((PFILA2) &controlBlock.aptoThreads);
-
-      if (status == 3) //final da fila
-      {
-        insertFILA2((PFILA2) &controlBlock.aptoThreads, thread);
-        finished = TRUE;
-      }
-
-    } while(!finished);
-  }
-
-
-  return 2;
-
-}
-
-
 /**
 	Função para gerar um TID a uma thread. Cada thread deverá ser associada a
 	um identificador único (TID – thread identifier) que será um número inteiro
@@ -215,7 +136,7 @@ int dispatcher(TCB_t* nextRunningThread){
   if(currentThread->state == PROCST_APTO || currentThread->state == PROCST_EXEC){
 	  currentThread->state = PROCST_APTO;
 	  currentThread->prio = currentThread->prio + stopTimer();
-	  insertThreadToFila(currentThread->prio, (void *) currentThread);
+	  insertByPrio((PFILA2) &controlBlock.aptoThreads, currentThread);
   }
 
   /* Caso a thread esteja foi bloqueda nãoa ltera sua prio e insere na fila de bloqueadas */

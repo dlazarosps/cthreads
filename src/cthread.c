@@ -51,7 +51,7 @@ int ccreate (void* (*start)(void*), void *arg, int prio) {
   insertFILA2(&controlBlock.allThreads, (void *) newThread);
   
   //Insere a nova thread na fila de aptos de acordo com sua prioridade
-  insertThreadToFila(prio, (void *) newThread);
+  insertByPrio((PFILA2) &controlBlock.aptoThreads, newThread);
 
   //Retorno do TID da thread recem gerada.
   return newThread->tid;
@@ -71,7 +71,7 @@ int csetprio(int tid, int prio) {
     copyThread->prio = prio;
 
     removeThreadFromFila(oldprio, tid);
-    insertThreadToFila(prio, (void *) copyThread);
+    insertByPrio((PFILA2) &controlBlock.aptoThreads, copyThread);
 
     return 0;
   } else {
@@ -254,7 +254,7 @@ int csignal(csem_t *sem) {
     }
     DeleteAtIteratorFila2(sem->fila); // Tira a thread da fila de semaforo.
     aux->state = PROCST_APTO;	// Coloca a thread no estado de APTO.
-    insertThreadToFila(aux->prio, (void *) aux); // Insere a thread na fila de APTOS de acordo com a prioridade.
+    insertByPrio((PFILA2) &controlBlock.aptoThreads, aux); // Insere a thread na fila de APTOS de acordo com a prioridade.
     return 0;
   }
 };

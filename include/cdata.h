@@ -62,7 +62,6 @@ extern struct control controlBlock;
 
 int cinit(void);
 void endThread(void);
-int insertThreadToFila(int prio, void * thread);
 int generateTID(void);
 int scheduler(void);
 int dispatcher(TCB_t *nextRunningThread);
