@@ -136,12 +136,12 @@ int insertThreadToFila(int prio, void * thread) {
         {
           nextnode = (TCB_t*) GetAtNextIteratorFila2((PFILA2) &controlBlock.aptoThreads);
           if(nextnode->prio > prio){
-            insertBeforeFILA2((PFILA2) &controlBlock.aptoThreads, thread);
+            // insertBeforeFILA2((PFILA2) &controlBlock.aptoThreads, thread);
             finished = TRUE;
           }
         }
         else{
-          insertBeforeFILA2((PFILA2) &controlBlock.aptoThreads, thread);
+          // insertBeforeFILA2((PFILA2) &controlBlock.aptoThreads, thread);
           finished = TRUE;
         }
       }

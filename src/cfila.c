@@ -44,30 +44,6 @@ void insertFILA2(PFILA2 fila, void* element) {
 }
 
 /**
-	Insere um elemento depois do elemento apontado por "fila".
-	Aponta ao primeiro elemento após a inserção.
-*/
-void insertAfterFILA2(PFILA2 fila, void* element) {
-  InsertAfterIteratorFila2(fila, element);
-  FirstFila2(fila);
-
-  return;
-}
-
-
-/**
-	Insere um elemento antes do elemento apontado por "fila".
-	Aponta ao primeiro elemento após a inserção.
-*/
-void insertBeforeFILA2(PFILA2 fila, void* element) {
-  InsertBeforeIteratorFila2(fila, element);
-  FirstFila2(fila);
-
-  return;
-}
-
-
-/**
 	Busca um elemento na fila.
 */
 int searchFILA2(PFILA2 fila, int tid, int resetIterator) {
