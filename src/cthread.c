@@ -136,7 +136,7 @@ int cjoin(int tid) {
   }
 
   TCB_t* waitThread;
-  waitThread = (TCB_t*) GetAtIteratorFila2(&controlBlock.allThreads);
+  waitThread = (TCB_t*) GetAtIteratorFila2((PFILA2) &controlBlock.allThreads);
   
   //Se já existe uma thread aguardando o seu término
   if( waitThread->tidJoinWait >= 0 ){
@@ -146,13 +146,11 @@ int cjoin(int tid) {
   // sinaliza que existe uma Thread esperando pelo termino dela
   waitThread->tidJoinWait = controlBlock.runningThread->tid;
   
-  
-  //precisa de uma flag para avisar o dispatcher na hora de trocar as threads
   controlBlock.runningThread->state = PROCST_BLOQ;  
   
   // troca de  threads / contexto
   scheduler();
-  return -1;
+  return 0;
 };
 
 
