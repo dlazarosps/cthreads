@@ -95,16 +95,9 @@ int cyield(void) {
     cinit();
   }
 
-  //Recebe da control a thread corrente.
-  TCB_t* lastRunningThread = controlBlock.runningThread;
-  
-  //Coloca esta thread no estado de APTO.
-  lastRunningThread->state = PROCST_APTO;
-
-  //Insere novamente a thread a fila de aptos de acordo com sua prioridade.
-  insertThreadToFila(lastRunningThread->prio, lastRunningThread);
-  
+  //Liberação voluntária da runningThread 
   //Seleciona a próxima thread a ser executada.
+  //yield -> scheduler -> dispatcher -> next
   scheduler();
 
   return 0;
