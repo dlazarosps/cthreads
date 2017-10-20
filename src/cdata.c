@@ -80,10 +80,31 @@ void endThread(void){
   	printf("TID: %i has ended. \n", controlBlock.runningThread->tid);
 	#endif
 
-    /* TO DO */
-    // verificar threads bloqueadas que estavam esperando thread que terminou
+  // Verifica threads bloqueadas que estavam esperando thread que terminou
 
-	scheduler();
+  /* RASCUNHO */
+
+  TCB_t* unblocked; 
+
+  if (FirstFila2((PFILA2) &controlBlock.blockedThreads)==0) {
+    do{
+        
+      unblocked = (TCB_t *) GetAtIteratorFila2((PFILA2) &controlBlock.blockedThreads);  
+        
+      //Caso o tidjoin for igual ao tid da thread que terminou desbloqueia
+      if (unblocked->tidJoinWait == controlBlock.runningThread->tid) {
+
+        unblocked->prio = PROCST_APTO;
+        insertByPrio((PFILA2) &controlBlock.aptoThreads, unblocked);
+
+      }
+    }
+    while (NextFila2((PFILA2) &controlBlock.blockedThreads)==0);
+  }
+  /* -- */
+
+    //Põe a rodar a proxima thread
+  	scheduler();
 }
 
 /**
