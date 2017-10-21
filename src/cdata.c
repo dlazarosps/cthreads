@@ -126,7 +126,9 @@ int scheduler(void) {
     nextRunningThread = (TCB_t*) GetAtIteratorFila2((PFILA2) &controlBlock.aptoThreads);
     removeFILA2((PFILA2) &controlBlock.aptoThreads, nextRunningThread->tid);
   } else {
+	#if DEBUG
 	printf("[ERRO] scheduler - Não encontrada nenhuma thread\n");
+	#endif
     return -1;
   }
 

@@ -45,8 +45,6 @@ int main() {
   // ** FIM DO TESTE CIDENTIFY + CCREATE **
   
   // >> LIBERANDO A CPU DE UMA THREAD USANDO A CYIELD << (CIDENTIFY + CCREATE + CJOIN
-  
-  	
 	printf("CJOIN na THREAD 1 (SUCESSO = 0): %d \n", cjoin(id0));
 	printf("CJOIN na THREAD 2 (SUCESSO = 0): %d \n", cjoin(id1));
   
