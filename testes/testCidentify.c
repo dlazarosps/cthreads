@@ -44,10 +44,22 @@ int main() {
 	
   // ** FIM DO TESTE CIDENTIFY + CCREATE **
   
-  // >> LIBERANDO A CPU DE UMA THREAD USANDO A CYIELD
+  // >> LIBERANDO A CPU DE UMA THREAD USANDO A CYIELD << (CIDENTIFY + CCREATE + CJOIN
+  
+  	
+	printf("CJOIN na THREAD 1 (SUCESSO = 0): %d \n", cjoin(id0));
+	printf("CJOIN na THREAD 2 (SUCESSO = 0): %d \n", cjoin(id1));
+  
+  	
+  // ** FIM DO TESTE CIDENTIFY + CCREATE + CJOIN **
+  
+  
+  // >> LIBERANDO A CPU DE UMA THREAD USANDO A CYIELD << (CIDENTIFY + CCREATE + SCHEDULER + CYIELD
 	printf("\n >> Liberação da CPU de uma thread com a CYIELD << \n");
-	printf("Selecionando uma thread na fila de aptos: %d \n", scheduler());
-	printf("Liberação da CPU (0 = SUCESSO): %d", cyield());
+  //printf("Selecionando uma thread na fila de aptos: %d \n", scheduler());
+	printf("Liberação da CPU (0 = SUCESSO): %d \n", cyield());
+	
+  // ** FIM DO TESTE CIDENTIFY + CCREATE + CJOIN +CYIELD **
 	
 	
   

@@ -141,11 +141,10 @@ int scheduler(void) {
 
 */
 int dispatcher(TCB_t* nextRunningThread){
-  TCB_t* currentThread = controlBlock.runningThread;
+  TCB_t* currentThread = (TCB_t*) &controlBlock.runningThread;
 
   /*Caso dispatcher esteja rodando pela primeira vez */
   if (controlBlock.isfirst == TRUE){
-
     currentThread->state = PROCST_APTO;
     currentThread->prio = currentThread->prio+1;
     insertByPrio((PFILA2) &controlBlock.aptoThreads, currentThread);
@@ -186,7 +185,7 @@ int dispatcher(TCB_t* nextRunningThread){
   //inicia o timer da prioridade
   startTimer();
 
-	return 0;
+  return 0;
 }
 
 //Copiada da /src/insert.c
