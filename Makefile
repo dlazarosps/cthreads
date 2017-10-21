@@ -50,8 +50,8 @@ build: all
 # Testes
 testes: all
 	@make -C "testes"
-	./testes/testcFila
-	./testes/testCidentify
+	./testes/testcThread
+	# ./testes/testcFila
 
 clear:
 	clear

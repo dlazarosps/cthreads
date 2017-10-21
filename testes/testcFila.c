@@ -50,13 +50,13 @@ int main() {
 	printf("Efetuando buscas por TID.\n");
 	searchArrayTID(allThreads, searchTID, 6);
 
-	/*
+	
 	// Remoção de elemento da fila
-	removeFILA2(allThreads, searchTID[5]);
-	removeFILA2(allThreads, searchTID[2]);
+	removeFILA2(allThreads, searchTID[1]);
+	removeFILA2(allThreads, searchTID[3]);
 
 	// Pesquisa usando os mesmos TIDs anteriores.
-	printf("\nElementos com TID %d e TID %d removidos. Efetuando busca novamente.\n", searchTID[5], searchTID[2]);
+	printf("\nElementos com TID %d e TID %d removidos. Efetuando busca novamente.\n", searchTID[1], searchTID[3]);
 	searchArrayTID(allThreads, searchTID, 6);
 
 	// Inserção novamento dos elementos removidos.
@@ -64,9 +64,9 @@ int main() {
 	insertFILA2(allThreads, (void *) thread3);
 
 	// Pesquisa usando os mesmos TIDs anteriores.
-	printf("\nElementos TID %d e TID %d reinseridos. Efetuando busca...\n", searchTID[5], searchTID[2]);
+	printf("\nElementos TID %d e TID %d reinseridos. Efetuando busca...\n", searchTID[1], searchTID[3]);
 	searchArrayTID(allThreads, searchTID, 6);
-	*/
+	
 
 	printf("\n --------------------------- \n");
 	printf("\n ---Testando Fila de Aptas--- \n");
