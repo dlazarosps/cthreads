@@ -145,19 +145,26 @@ int cjoin(int tid) {
   if (!controlBlock.initiated) {
     cinit();
   }
-  #if DEBUG
-  printf("[CJOIN] - TID parametro: %d \n", tid);
-  #endif
+  
+    #if DEBUG
+    printf("[CJOIN] - TID parametro: %d \n", tid);
+    #endif
+
   TCB_t* currentThread = (TCB_t*) &controlBlock.runningThread;
+  
   int found = FALSE;
-  #if DEBUG
-  printf("[CJOIN] - RunningThread->TID: %d prio: %d \n",currentThread->tid, currentThread->prio);
-  #endif
+  
+    #if DEBUG
+    printf("[CJOIN] - RunningThread->TID: %d prio: %d \n",currentThread->tid, currentThread->prio);
+    #endif
+  
   //se a thread procurada esta sendo executada
   if (currentThread->tid == tid) {
-	#if DEBUG
-	printf("[ERRO] cjoin - a thread procurada esta sendo executada\n");
-	#endif
+
+  	#if DEBUG
+  	printf("[ERRO] cjoin - a thread procurada esta sendo executada\n");
+  	#endif
+
     return -1;
   }
   
@@ -189,18 +196,20 @@ int cjoin(int tid) {
   
   //Se já existe uma thread aguardando o seu término
   if( waitThread->tidJoinWait >= 0 ){
-	 #if DEBUG
+	 
+   #if DEBUG
 	 printf("[ERRO] cjoin - já existe uma thread aguardando o seu término\n");
 	 #endif
-	 return -1; 
+	 
+   return -1; 
   }
   
   // sinaliza que existe uma Thread esperando pelo termino dela
   #if DEBUG
   printf("[CJOIN] - waitThread->TID: %d \n",waitThread->tid);
   #endif
-  waitThread->tidJoinWait = controlBlock.runningThread->tid;
   
+  waitThread->tidJoinWait = controlBlock.runningThread->tid;  
   controlBlock.runningThread->state = PROCST_BLOQ;  
   
   // troca de  threads / contexto

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include "../include/cthread.h"
 #include "../include/cfila.h"
 #include "../include/cdata.h"
@@ -39,8 +40,38 @@ int main() {
 	printf("\n >> Geração de duas threads através da CCREATE << \n");
 	id0 = ccreate(func0, (void *)&i, 0);
 	printf("THREAD 1 criada: - TID %d \n", id0);
+
+	// scheduler();
+
 	id1 = ccreate(func1, (void *)&i, 0);
 	printf("THREAD 2 criada: - TID %d \n", id1);
+
+	printf("\n ----------- \n");
+	sleep(5);
+
+
+	TCB_t * node;
+	if(FirstFila2((PFILA2) &controlBlock.aptoThreads) == 0){
+		node = (TCB_t*) GetAtIteratorFila2((PFILA2) &controlBlock.aptoThreads);
+		printf("\t FIRST APTAS \n");
+		printf("Pointer: %p - TID: %d - Prio = %d \n", node, node->tid, node->prio);
+	}
+	else{
+		printf("\n -----ERRO FIRST APTOS------ \n");
+	}
+
+	if(FirstFila2((PFILA2) &controlBlock.allThreads) == 0){
+		node = (TCB_t*) GetAtIteratorFila2((PFILA2) &controlBlock.aptoThreads);
+		printf("\t FIRST ALL \n");
+		printf("Pointer: %p - TID: %d - Prio = %d \n", node, node->tid, node->prio);
+	}
+	else{
+		printf("\n -----ERRO FIRST ALL------ \n");
+	}
+
+	printf("\n ----------- \n");
+
+	sleep(5);
 	
 	
   // ** FIM DO TESTE CIDENTIFY + CCREATE **

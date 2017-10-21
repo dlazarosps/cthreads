@@ -44,7 +44,12 @@ int cinit(void) {
   mainThread->state = PROCST_EXEC;
   mainThread->prio = 0;
 
-  insertFILA2(&controlBlock.allThreads, (void *) mainThread);
+  if (insertFILA2(&controlBlock.allThreads, (void *) mainThread) != 0){
+    #if DEBUG
+      printf("[ERRO] cinit - insert - Não inserida em allThreads \n");
+    #endif
+    return -4;
+  }
 
   /*
     Set ending function for all created threads
@@ -91,10 +96,12 @@ void endThread(void){
 		
 	      //Caso o tidjoin for igual ao tid da thread que terminou desbloqueia
 	      if (unblocked->tid == controlBlock.runningThread->tidJoinWait) {
-		if(DeleteAtIteratorFila2((PFILA2) &controlBlock.blockedThreads)== 0){ //Remove da fila de Blocked
-			unblocked->prio = PROCST_APTO;
-			insertByPrio((PFILA2) &controlBlock.aptoThreads, unblocked); //Adiciona na fila de APTO
-		}
+
+      		if(DeleteAtIteratorFila2((PFILA2) &controlBlock.blockedThreads)== 0){ //Remove da fila de Blocked
+      			unblocked->prio = PROCST_APTO;
+      			insertByPrio((PFILA2) &controlBlock.aptoThreads, unblocked); //Adiciona na fila de APTO
+            
+      		}
 	      }
 	    }
 	    while (NextFila2((PFILA2) &controlBlock.blockedThreads)==0);
@@ -131,7 +138,7 @@ int scheduler(void) {
       #if DEBUG
         printf("[ERRO] scheduler - removeFILA2 - Não removida \n");
       #endif
-        
+
       return -1;
     }
 
