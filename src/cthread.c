@@ -183,8 +183,8 @@ int cjoin(int tid) {
   controlBlock.runningThread->state = PROCST_BLOQ;  
   
   // troca de  threads / contexto
-  scheduler();
-  return 0;
+  
+  return scheduler();
 };
 
 
