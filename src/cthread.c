@@ -293,7 +293,7 @@ int cidentify (char *name, int size) {
   if (size == 0) {
     name[0] = '\0';
 
-    return 0;
+    return -1;
   }
 
   char info[] = "\n Douglas Lazaro S P Silva \t- 207305 \n Henrique La Porta \t- 273112 \n Rodrigo Okido \t- 252745";
@@ -302,9 +302,11 @@ int cidentify (char *name, int size) {
   if(size < length) {
     memcpy(name, info, size);
     name[size] = '\0';
+	printf("%s\n",name);
   } else {
     memcpy(name, info, length);
     name[length] = '\0';
+	printf("%s\n",name);
   }
 
   return 0;

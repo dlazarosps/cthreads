@@ -122,7 +122,6 @@ int generateTID(void) {
 */
 int scheduler(void) {
   TCB_t* nextRunningThread;
-
   if (FirstFila2((PFILA2) &controlBlock.aptoThreads) == 0) {
     nextRunningThread = (TCB_t*) GetAtIteratorFila2((PFILA2) &controlBlock.aptoThreads);
     removeFILA2((PFILA2) &controlBlock.aptoThreads, nextRunningThread->tid);

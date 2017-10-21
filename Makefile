@@ -51,6 +51,7 @@ build: all
 testes: all
 	@make -C "testes"
 	./testes/testcFila
+	./testes/testCidentify
 
 clear:
 	clear
