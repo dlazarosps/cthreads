@@ -42,19 +42,41 @@ int ccreate (void* (*start)(void*), void *arg, int prio) {
   newThread->context.uc_stack.ss_size = SIGSTKSZ;
 
   if(newThread->context.uc_stack.ss_sp == NULL) {
+    
+    #if DEBUG
+    printf("[ERRO] ccreate - contexto \n");
+    #endif
+
     return -1;
   }
 
   makecontext(&newThread->context, (void(*))start, 1, arg);
 
   //Insere a nova thread na fila de todas as threads
-  insertFILA2(&controlBlock.allThreads, (void *) newThread);
+  if(insertFILA2(&controlBlock.allThreads, (void *) newThread) != 0){
+
+    #if DEBUG
+    printf("[ERRO] ccreate - insertFILA2 - allThreads \n");
+    #endif
+
+    return -2;
+
+  }
   
   //Insere a nova thread na fila de aptos de acordo com sua prioridade
-  insertByPrio((PFILA2) &controlBlock.aptoThreads, newThread);
+  if(insertByPrio((PFILA2) &controlBlock.aptoThreads, newThread) == 0){
+    //Retorno do TID da thread recem gerada.
+    return newThread->tid;
+  }
+  else{
 
-  //Retorno do TID da thread recem gerada.
-  return newThread->tid;
+    #if DEBUG
+    printf("[ERRO] ccreate - insertByPrio - APTOS \n");
+    #endif
+
+    return -3;
+  }
+
 };
 
 /*
@@ -98,9 +120,8 @@ int cyield(void) {
   //Liberação voluntária da runningThread 
   //Seleciona a próxima thread a ser executada.
   //yield -> scheduler -> dispatcher -> next
-  scheduler();
 
-  return 0;
+  return scheduler();
 };
 
 

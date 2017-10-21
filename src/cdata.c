@@ -123,13 +123,26 @@ int generateTID(void) {
 int scheduler(void) {
   TCB_t* nextRunningThread;
   if (FirstFila2((PFILA2) &controlBlock.aptoThreads) == 0) {
+
     nextRunningThread = (TCB_t*) GetAtIteratorFila2((PFILA2) &controlBlock.aptoThreads);
-    removeFILA2((PFILA2) &controlBlock.aptoThreads, nextRunningThread->tid);
-  } else {
-	#if DEBUG
-	printf("[ERRO] scheduler - Não encontrada nenhuma thread\n");
-	#endif
-    return -1;
+    
+    if(removeFILA2((PFILA2) &controlBlock.aptoThreads, nextRunningThread->tid) != TRUE){
+    
+      #if DEBUG
+        printf("[ERRO] scheduler - removeFILA2 - Não removida \n");
+      #endif
+        
+      return -1;
+    }
+
+  } 
+  else {
+
+  	#if DEBUG
+  	printf("[ERRO] scheduler - Não encontrada nenhuma thread\n");
+  	#endif
+
+    return -2;
   }
 
   nextRunningThread->state = PROCST_EXEC;
@@ -147,10 +160,16 @@ int dispatcher(TCB_t* nextRunningThread){
 
   /*Caso dispatcher esteja rodando pela primeira vez */
   if (controlBlock.isfirst == TRUE){
+
     currentThread->state = PROCST_APTO;
     currentThread->prio = currentThread->prio+1;
-    insertByPrio((PFILA2) &controlBlock.aptoThreads, currentThread);
     
+    if(insertByPrio((PFILA2) &controlBlock.aptoThreads, currentThread) != 0){
+      #if DEBUG
+        printf("[ERRO] dispatcher - FIRST - Não inserida em Aptos \n");
+      #endif
+      return -1;
+    }  
     //Desativa flag
     controlBlock.isfirst = FALSE;
 
@@ -164,23 +183,35 @@ int dispatcher(TCB_t* nextRunningThread){
     //Altera a prioridade da thread
     currentThread->prio = currentThread->prio + stopTimer();
     
-    //Caso a thread esteja é apta ou estava executando insere na fila de aptas
-    if(currentThread->state == PROCST_APTO || currentThread->state == PROCST_EXEC){
-
-      currentThread->state = PROCST_APTO;
-      insertByPrio((PFILA2) &controlBlock.aptoThreads, currentThread);
-
-    }
-
+    switch(currentThread->state){
+    
     // Caso a thread esteja foi bloqueda insere na fila de bloqueadas
-    if(currentThread->state == PROCST_BLOQ){
-      insertFILA2((PFILA2) &controlBlock.blockedThreads, (void *) currentThread);
+      case PROCST_BLOQ:
+        if(insertFILA2((PFILA2) &controlBlock.blockedThreads, (void *) currentThread) != 0){
+          #if DEBUG
+            printf("[ERRO] dispatcher - CASE BLOQ - Não inserida em blockedThreads \n");
+          #endif
+            return -2;
+        }
+        break;
+
+    //Caso a thread esteja é apta ou estava executando insere na fila de aptas
+      case PROCST_APTO:
+      case PROCST_EXEC:
+      default:
+        currentThread->state = PROCST_APTO;
+        if(insertByPrio((PFILA2) &controlBlock.aptoThreads, currentThread)!=0){
+          #if DEBUG
+            printf("[ERRO] dispatcher - CASE default - Não inserida em Aptos \n");
+          #endif
+          return -3;
+        }
     }  
   }
 
   //efetua a troca de contexto running <-> next
+  controlBlock.runningThread = nextRunningThread;
   swapcontext(&currentThread->context, &nextRunningThread->context);
-  dispatcher(nextRunningThread);
   //inicia o timer da prioridade
   startTimer();
 

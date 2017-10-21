@@ -36,11 +36,9 @@ int initFILA2(PFILA2 fila, int isPointer) {
 	Insere um elemento ao final da fila. E aponta ao primeiro elemento 
 	após a inserção.
 */
-void insertFILA2(PFILA2 fila, void* element) {
+int insertFILA2(PFILA2 fila, void* element) {
   AppendFila2(fila, element);
-  FirstFila2(fila);
-
-  return;
+  return FirstFila2(fila);
 }
 
 /**
@@ -107,10 +105,20 @@ int searchFILA2(PFILA2 fila, int tid, int resetIterator) {
 */
 int removeFILA2(PFILA2 fila, int tid) {
   int found = searchFILA2(fila, tid, TRUE);
+  int status = 0;
 
   if(found == TRUE) {
-    DeleteAtIteratorFila2(fila);
-  }
+      status = DeleteAtIteratorFila2(fila);
+      
+      if(status != 0){
+        
+        #if DEBUG
+          printf("[ERRO] - removeFILA2 - %d.\n", status);
+        #endif
+        
+        found = FALSE;
+      }
+    }
 
   return found;
 }
