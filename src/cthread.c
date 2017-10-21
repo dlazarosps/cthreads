@@ -125,19 +125,25 @@ int cjoin(int tid) {
     cinit();
   }
   
+  TCB_t* currentThread = (TCB_t*) &controlBlock.runningThread;
   int found = FALSE;
+  
   
   //se a thread procurada esta sendo executada
   if (controlBlock.runningThread->tid == tid) {
+	printf("[ERRO] cjoin - a thread procurada esta sendo executada\n");
     return -1;
   }
   
+  TCB_t* auxThread;
   TCB_t* waitThread;
   // Verifica se a thread existe
   if (FirstFila2((PFILA2) &controlBlock.aptoThreads)==0) {
     do {
-      waitThread = (TCB_t *) GetAtIteratorFila2((PFILA2) &controlBlock.aptoThreads);
-      if (tid == waitThread->tid) {
+      auxThread = (TCB_t *) GetAtIteratorFila2((PFILA2) &controlBlock.aptoThreads);
+	  
+      if (tid == auxThread->tid) {
+		waitThread = auxThread;
         found = TRUE;
       }
     } while (NextFila2((PFILA2) &controlBlock.aptoThreads)==0 && found == FALSE);
@@ -145,8 +151,9 @@ int cjoin(int tid) {
   
   if (FirstFila2((PFILA2) &controlBlock.blockedThreads)==0) {
     do {
-      waitThread = (TCB_t *) GetAtIteratorFila2((PFILA2) &controlBlock.blockedThreads);
-      if (tid == waitThread->tid) {
+      auxThread = (TCB_t *) GetAtIteratorFila2((PFILA2) &controlBlock.blockedThreads);
+      if (tid == auxThread->tid) {
+		waitThread = auxThread;
         found = TRUE;
       }
     } while (NextFila2((PFILA2) &controlBlock.blockedThreads)==0 && found == FALSE);
@@ -156,17 +163,18 @@ int cjoin(int tid) {
   
   //Se já existe uma thread aguardando o seu término
   if( waitThread->tidJoinWait >= 0 ){
+	 printf("[ERRO] cjoin - já existe uma thread aguardando o seu término\n");
 	 return -1; 
   }
   
   // sinaliza que existe uma Thread esperando pelo termino dela
+  
   waitThread->tidJoinWait = controlBlock.runningThread->tid;
   
   controlBlock.runningThread->state = PROCST_BLOQ;  
   
   // troca de  threads / contexto
-  scheduler();
-  return 0;
+  return scheduler();
 };
 
 

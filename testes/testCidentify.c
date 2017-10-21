@@ -38,7 +38,7 @@ int main() {
 	printf("\n >> Geração de duas threads através da CCREATE << \n");
 	id0 = ccreate(func0, (void *)&i, 0);
 	printf("THREAD 1 criada: - TID %d \n", id0);
-	id1 = ccreate(func1, (void *)&i, 1);
+	id1 = ccreate(func1, (void *)&i, 0);
 	printf("THREAD 2 criada: - TID %d \n", id1);
 	
 	

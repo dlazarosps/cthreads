@@ -126,12 +126,12 @@ int scheduler(void) {
     nextRunningThread = (TCB_t*) GetAtIteratorFila2((PFILA2) &controlBlock.aptoThreads);
     removeFILA2((PFILA2) &controlBlock.aptoThreads, nextRunningThread->tid);
   } else {
+	printf("[ERRO] scheduler - Não encontrada nenhuma thread\n");
     return -1;
   }
 
   nextRunningThread->state = PROCST_EXEC;
-  dispatcher(nextRunningThread);
-  return 0;
+  return   dispatcher(nextRunningThread);;
 }
 
 
@@ -172,16 +172,13 @@ int dispatcher(TCB_t* nextRunningThread){
 
     // Caso a thread esteja foi bloqueda insere na fila de bloqueadas
     if(currentThread->state == PROCST_BLOQ){
-
       insertFILA2((PFILA2) &controlBlock.blockedThreads, (void *) currentThread);
-
     }  
   }
 
   //efetua a troca de contexto running <-> next
-  controlBlock.runningThread = nextRunningThread;
   swapcontext(&currentThread->context, &nextRunningThread->context);
-
+  dispatcher(nextRunningThread);
   //inicia o timer da prioridade
   startTimer();
 
