@@ -64,12 +64,13 @@ int cinit(void) {
     Create context to main thread
     Set Main thread as running
   */
+  controlBlock.runningThread = mainThread;
+
   getcontext(&mainThread->context);
   mainThread->context.uc_link =  &controlBlock.endThread;
   mainThread->context.uc_stack.ss_sp = (char*) malloc(SIGSTKSZ);
   mainThread->context.uc_stack.ss_size = SIGSTKSZ;
 
-  controlBlock.runningThread = mainThread;
 
   return 0;
 };
@@ -156,7 +157,11 @@ int scheduler(void) {
   	printf("[ERRO] scheduler - Não encontrada nenhuma thread\n");
   	#endif
 
-    return -2;
+    //caso não tenha nenhuma thread apta continua executando a q estava
+    nextRunningThread = controlBlock.runningThread;
+
+    // return -2;
+
   }
 
   nextRunningThread->state = PROCST_EXEC;
@@ -200,6 +205,17 @@ int dispatcher(TCB_t* nextRunningThread){
     switch(currentThread->state){
     
       case PROCST_TERMINO:
+        //deletar thread da allthreads ?
+        //libera pilha do contexto
+        free(currentThread->context.uc_stack.ss_sp);
+        free(currentThread);
+
+        if (nextRunningThread != currentThread){ //se for diferente
+          
+          startTimer();
+          setcontext(&nextRunningThread->context); //contexto da proxima
+          return 0;
+        }
         break;
     // Caso a thread esteja foi bloqueda insere na fila de bloqueadas
       case PROCST_BLOQ:
@@ -225,11 +241,12 @@ int dispatcher(TCB_t* nextRunningThread){
     }  
   }
 
-  //efetua a troca de contexto running <-> next
   controlBlock.runningThread = nextRunningThread;
-  swapcontext(&currentThread->context, &nextRunningThread->context);
   //inicia o timer da prioridade
   startTimer();
+  
+  //efetua a troca de contexto running <-> next
+  swapcontext(&currentThread->context, &nextRunningThread->context);
 
   return 0;
 }
