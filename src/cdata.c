@@ -60,6 +60,8 @@ int cinit(void) {
   controlBlock.endThread.uc_stack.ss_size = SIGSTKSZ;
   makecontext(&controlBlock.endThread, (void (*)(void))endThread, 0);
 
+  controlBlock.runningThread = mainThread;
+  
   /*
     Create context to main thread
     Set Main thread as running
@@ -69,25 +71,29 @@ int cinit(void) {
   mainThread->context.uc_stack.ss_sp = (char*) malloc(SIGSTKSZ);
   mainThread->context.uc_stack.ss_size = SIGSTKSZ;
 
-  controlBlock.runningThread = mainThread;
-
   return 0;
 };
 
 
 void endThread(void){
-  getcontext(&controlBlock.endThread);
+	getcontext(&controlBlock.endThread);
 
-  // Delete thread from blocking threads
-
+	// Caso exista desbloquei a thread que esperava o seu término
+	releaseThreadJoin();
+  
+	// Delete thread from blocking threads
 	controlBlock.runningThread->state = PROCST_TERMINO;
 
 	#if DEBUG
   	printf("TID: %i has ended. \n", controlBlock.runningThread->tid);
 	#endif
+  
+    //Põe a rodar a proxima thread
+	scheduler();
+}
 
-  // Verifica a thread bloqueada que estava esperando a thread que terminou
-  if (controlBlock.runningThread->tidJoinWait >= 0){
+void releaseThreadJoin(void){
+	if (controlBlock.runningThread->tidJoinWait >= 0){
 	TCB_t* unblocked; 
 	  
 	  if (FirstFila2((PFILA2) &controlBlock.blockedThreads)==0) {
@@ -114,11 +120,7 @@ void endThread(void){
 	    while (NextFila2((PFILA2) &controlBlock.blockedThreads)==0);
 	  }
   }
-    //Põe a rodar a proxima thread
-	scheduler();
 }
-
-
 /**
 	Função para gerar um TID a uma thread. Cada thread deverá ser associada a
 	um identificador único (TID – thread identifier) que será um número inteiro
