@@ -71,55 +71,53 @@ int cinit(void) {
   mainThread->context.uc_stack.ss_sp = (char*) malloc(SIGSTKSZ);
   mainThread->context.uc_stack.ss_size = SIGSTKSZ;
 
-
   return 0;
 };
 
 
 void endThread(void){
-  getcontext(&controlBlock.endThread);
+	getcontext(&controlBlock.endThread);
 
-  // Delete thread from blocking threads
-
+	// Caso exista desbloquei a thread que esperava o seu término
+	releaseThreadJoin();
+  
+	// Delete thread from blocking threads
 	controlBlock.runningThread->state = PROCST_TERMINO;
 
 	#if DEBUG
   	printf("TID: %i has ended. \n", controlBlock.runningThread->tid);
 	#endif
-
-  // Verifica a thread bloqueada que estava esperando a thread que terminou
-  if (controlBlock.runningThread->tidJoinWait >= 0){
-	TCB_t* unblocked; 
-	  
-	  if (FirstFila2((PFILA2) &controlBlock.blockedThreads)==0) {
-	    do{
-		
-	      unblocked = (TCB_t *) GetAtIteratorFila2((PFILA2) &controlBlock.blockedThreads);  
-		
-	      //Caso o tidjoin for igual ao tid da thread que terminou desbloqueia
-	      if (unblocked->tid == controlBlock.runningThread->tidJoinWait) {
-
-      		if(DeleteAtIteratorFila2((PFILA2) &controlBlock.blockedThreads)== 0){ //Remove da fila de Blocked
-      			
-            unblocked->prio = PROCST_APTO;
-      			insertByPrio((PFILA2) &controlBlock.aptoThreads, unblocked); //Adiciona na fila de APTO
-
-      		}
-          else{
-              #if DEBUG
-                printf("[ERRO] - endThread -  ao remover da blockedThreads. \n");
-              #endif
-          }
-	      }
-	    }
-	    while (NextFila2((PFILA2) &controlBlock.blockedThreads)==0);
-	  }
-  }
+  
     //Põe a rodar a proxima thread
 	scheduler();
 }
 
-
+void releaseThreadJoin(void){
+	if (controlBlock.runningThread->tidJoinWait >= 0){
+	TCB_t* unblocked; 
+		//procura thread na fila allThreads
+		  if(searchFILA2(&controlBlock.allThreads, controlBlock.runningThread->tidJoinWait, TRUE) == TRUE) {
+			unblocked = (TCB_t*) GetAtIteratorFila2(&controlBlock.allThreads);
+			if(unblocked->prio == PROCST_BLOQ){
+				if(DeleteAtIteratorFila2((PFILA2) &controlBlock.blockedThreads)== 0){ //Remove da fila de Blocked
+					unblocked->prio = PROCST_APTO;
+					insertByPrio((PFILA2) &controlBlock.aptoThreads, unblocked); //Adiciona na fila de APTO
+				}
+			}else{
+				#if DEBUG
+				printf("[ERRO] releaseThreadJoin - a thread não esta no estao bloqueado \n");
+				#endif
+			}
+		  } else {
+			#if DEBUG
+			printf("[ERRO] releaseThreadJoin - a thread não encontrada na allThreads \n");
+			#endif
+		  }
+   }
+  #if DEBUG
+  	printf("[releaseThreadJoin] - finish \n");
+	#endif
+}
 /**
 	Função para gerar um TID a uma thread. Cada thread deverá ser associada a
 	um identificador único (TID – thread identifier) que será um número inteiro
@@ -136,11 +134,12 @@ int generateTID(void) {
 
 */
 int scheduler(void) {
+	#if DEBUG
+  	printf("[scheduler] - init \n");
+	#endif
   TCB_t* nextRunningThread;
   if (FirstFila2((PFILA2) &controlBlock.aptoThreads) == 0) {
-
     nextRunningThread = (TCB_t*) GetAtIteratorFila2((PFILA2) &controlBlock.aptoThreads);
-    
     if(removeFILA2((PFILA2) &controlBlock.aptoThreads, nextRunningThread->tid) != TRUE){
     
       #if DEBUG
@@ -149,22 +148,22 @@ int scheduler(void) {
 
       return -1;
     }
-
   } 
   else {
 
   	#if DEBUG
-  	printf("[ERRO] scheduler - Não encontrada nenhuma thread\n");
+  	printf("[ERRO] scheduler - Não encontrada nenhuma thread Apta\n");
   	#endif
 
     //caso não tenha nenhuma thread apta continua executando a q estava
     nextRunningThread = controlBlock.runningThread;
 
     // return -2;
-
   }
-
   nextRunningThread->state = PROCST_EXEC;
+	#if DEBUG
+  	printf("[scheduler] - call dispatcher \n");
+	#endif
   return   dispatcher(nextRunningThread);
 }
 
@@ -175,11 +174,13 @@ int scheduler(void) {
 
 */
 int dispatcher(TCB_t* nextRunningThread){
+	#if DEBUG
+  	printf("[DISPATCHER] - init \n");
+	#endif
   TCB_t* currentThread = (TCB_t*) &controlBlock.runningThread;
 
   /*Caso dispatcher esteja rodando pela primeira vez */
   if (controlBlock.isfirst == TRUE){
-
     currentThread->state = PROCST_APTO;
     // currentThread->prio = currentThread->prio+1;
     
@@ -205,6 +206,9 @@ int dispatcher(TCB_t* nextRunningThread){
     switch(currentThread->state){
     
       case PROCST_TERMINO:
+		    #if DEBUG
+        printf("[DISPATCHER] - CASE PROCST_TERMINO \n");
+        #endif
         //deletar thread da allthreads ?
         //libera pilha do contexto
         free(currentThread->context.uc_stack.ss_sp);
@@ -219,6 +223,9 @@ int dispatcher(TCB_t* nextRunningThread){
         break;
     // Caso a thread esteja foi bloqueda insere na fila de bloqueadas
       case PROCST_BLOQ:
+		    #if DEBUG
+        printf("[DISPATCHER] - CASE PROCST_BLOQ \n");
+        #endif
         if(insertFILA2((PFILA2) &controlBlock.blockedThreads, (void *) currentThread) != 0){
           #if DEBUG
             printf("[ERRO] dispatcher - CASE BLOQ - Não inserida em blockedThreads \n");
@@ -231,6 +238,9 @@ int dispatcher(TCB_t* nextRunningThread){
       case PROCST_APTO:
       case PROCST_EXEC:
       default:
+		#if DEBUG
+        printf("[DISPATCHER] - CASE PROCST_APTO PROCST_EXEC DEFAULT\n");
+        #endif
         currentThread->state = PROCST_APTO;
         if(insertByPrio((PFILA2) &controlBlock.aptoThreads, currentThread)!=0){
           #if DEBUG

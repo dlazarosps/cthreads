@@ -145,70 +145,50 @@ int cjoin(int tid) {
   if (!controlBlock.initiated) {
     cinit();
   }
-  
-    #if DEBUG
-    printf("[CJOIN] - TID parametro: %d \n", tid);
-    #endif
-  
     #if DEBUG
     printf("[CJOIN] - RunningThread->TID: %d prio: %d \n",controlBlock.runningThread->tid, controlBlock.runningThread->prio);
     #endif
   
   //se a thread procurada esta sendo executada
   if (controlBlock.runningThread->tid == tid) {
-
   	#if DEBUG
   	printf("[ERRO] cjoin - a thread procurada esta sendo executada\n");
   	#endif
-
     return -1;
   }
 
-
-  
   TCB_t * waitThread;
   //procura thread na fila allThreads
   if(searchFILA2(&controlBlock.allThreads, tid, TRUE) == TRUE) {
     waitThread = (TCB_t*) GetAtIteratorFila2(&controlBlock.allThreads);
   } else {
-
     #if DEBUG
     printf("[ERRO] cjoin - a thread não encontrada na allThreads \n");
     #endif
-    /* TID not found */
     return -2;
   }
 
   //Se já terminou a thread aguardada
   if(waitThread->state == PROCST_TERMINO){
-   
    #if DEBUG
    printf("[TERMINOU] cjoin - a thread aguardada já terminou \n");
    #endif
-   
    return 0; 
   }
   
   //Se já existe uma thread aguardando o seu término
   if( waitThread->tidJoinWait >= 0 ){
-	 
-   #if DEBUG
-	 printf("[ERRO] cjoin - já existe uma thread aguardando o seu término\n");
-	 #endif
-	 
-   return -3; 
+    #if DEBUG
+	printf("[ERRO] cjoin - já existe uma thread aguardando o seu término\n");
+	#endif
+    return -3; 
   }
 
   // sinaliza que existe uma Thread esperando pelo termino dela
-  #if DEBUG
-  printf("[CJOIN] - waitThread->TID: %d \n",waitThread->tid);
-  #endif
-  
   waitThread->tidJoinWait = controlBlock.runningThread->tid;  
   controlBlock.runningThread->state = PROCST_BLOQ;  
   
   // troca de  threads / contexto
-  
   return scheduler();
 };
 
@@ -230,17 +210,20 @@ int cjoin(int tid) {
 	contrario.
 */
 int csem_init(csem_t *sem, int count) {
-  if (!controlBlock.initiated) {
-    cinit();
-  }
+	if (!controlBlock.initiated) {
+		cinit();
+	}
 
-  sem->count = count;
-
-  if (initFILA2(sem->fila, TRUE)) {
-    return 0;
-  } else {
+	sem->count = count;
+	sem->fila = (PFILA2) malloc(sizeof(PFILA2));
+	/* Se foi alocada ... */
+	if (sem->fila == NULL)
+		return -1;
+	/* Cria a fila, se == 0 tudo ok, caso contrario -1 */
+	if(CreateFila2(sem->fila) == 0)
+		return 0;
+	
     return -1;
-  }
 };
 
 
@@ -261,14 +244,19 @@ int cwait(csem_t *sem) {
   if (!controlBlock.initiated) {
     cinit();
   }
-
+	#if DEBUG
+    printf("[CWAIT] Iniciou \n");
+    #endif
   // Recebe a thread corrente da control.
-  TCB_t* RunningThread = controlBlock.runningThread;
-
+  TCB_t* RunningThread = (TCB_t*) &controlBlock.runningThread;
+  
   // Verifica o valor de count. Se menor, a thread é bloqueada e colocada na fila 
   // de semaforos.
   if(sem->count > 0){
-    sem->count = 0;
+    sem->count--;
+	#if DEBUG
+    printf("[CWAIT] count > 0 \n");
+    #endif
     return 0;
   }
   else{
@@ -299,21 +287,28 @@ int csignal(csem_t *sem) {
     cinit();
   }
   sem->count++;
-  if (sem->count>0){
+  if (sem->count > 0){
     return 0;
   }
   else{
-    FirstFila2(sem->fila);
-    TCB_t *aux;
-    aux = GetAtIteratorFila2(sem->fila);
-	printf("THREAD PELA CSIGNAL: %p\n", aux);
-    if (aux==NULL){
-        return -1;
-    }
-    DeleteAtIteratorFila2(sem->fila); // Tira a thread da fila de semaforo.
-    aux->state = PROCST_APTO;	// Coloca a thread no estado de APTO.
-    insertByPrio((PFILA2) &controlBlock.aptoThreads, aux); // Insere a thread na fila de APTOS de acordo com a prioridade.
-    return 0;
+    if(FirstFila2(sem->fila)==0){
+		TCB_t *aux;
+		aux = GetAtIteratorFila2(sem->fila);
+		printf("THREAD PELA CSIGNAL: %p\n", aux);
+		if (aux==NULL){
+			sem->count--;
+			return -1;
+		}
+		DeleteAtIteratorFila2(sem->fila); // Tira a thread da fila de semaforo.
+		aux->state = PROCST_APTO;	// Coloca a thread no estado de APTO.
+		insertByPrio((PFILA2) &controlBlock.aptoThreads, aux); // Insere a thread na fila de APTOS de acordo com a prioridade.
+		return 0;
+	}else{
+		#if DEBUG
+		printf("[ERRO] - csignal - fila semafaro vazia \n");
+		#endif
+		return -1;
+	}
   }
 };
 

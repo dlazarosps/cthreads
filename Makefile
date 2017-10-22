@@ -52,7 +52,6 @@ testes: all
 	@make -C "testes"
 	./testes/testcSemaforo
 	./testes/testcThread
-	
 	# ./testes/testcFila
 
 clear:
