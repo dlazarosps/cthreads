@@ -40,6 +40,7 @@ typedef struct s_TCB {
 #define TRUE 1
 
 #define DEBUG TRUE
+#define DEBUGFILA TRUE
 
 struct control {
 	int initiated;

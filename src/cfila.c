@@ -136,3 +136,19 @@ int removeFILA2(PFILA2 fila, int tid) {
 
   return found;
 }
+
+void printFila(PFILA2 fila){
+	TCB_t * node;
+	if(FirstFila2(fila) == 0){
+		node = (TCB_t*) GetAtIteratorFila2((PFILA2) &controlBlock.aptoThreads);
+		printf("-------------------------------------------------- \n");
+		printf("\t Print FILA \n");
+		printf("-------------------------------------------------- \n");
+		printf("Pointer: %p - TID: %d - Prio = %d \n", node, node->tid, node->prio);
+		while(NextFila2(fila)==0){
+			node = (TCB_t*) GetAtIteratorFila2((PFILA2) &controlBlock.aptoThreads);
+			printf("Pointer: %p - TID: %d - Prio = %d \n", node, node->tid, node->prio);
+		}
+	}
+	printf("-------------------------------------------------- \n");
+}

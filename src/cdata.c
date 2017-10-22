@@ -135,12 +135,15 @@ int generateTID(void) {
 */
 int scheduler(void) {
 	#if DEBUG
-  	printf("[scheduler] - init \n");
+    printf("[SCHEDULER]- RunningThread - TID[%d] - PRIO[%d] \n", controlBlock.runningThread->tid, controlBlock.runningThread->prio);
+	#endif
+	#if DEBUGFILA
+	printFila((PFILA2) &controlBlock.aptoThreads);
 	#endif
   TCB_t* nextRunningThread;
   if (FirstFila2((PFILA2) &controlBlock.aptoThreads) == 0) {
     nextRunningThread = (TCB_t*) GetAtIteratorFila2((PFILA2) &controlBlock.aptoThreads);
-    if(removeFILA2((PFILA2) &controlBlock.aptoThreads, nextRunningThread->tid) != TRUE){
+    if(DeleteAtIteratorFila2((PFILA2) &controlBlock.aptoThreads) != 0){
     
       #if DEBUG
         printf("[ERRO] scheduler - removeFILA2 - Não removida \n");
@@ -148,6 +151,7 @@ int scheduler(void) {
 
       return -1;
     }
+	
   } 
   else {
 
@@ -162,7 +166,7 @@ int scheduler(void) {
   }
   nextRunningThread->state = PROCST_EXEC;
 	#if DEBUG
-  	printf("[scheduler] - call dispatcher \n");
+  	printf("[scheduler] - call dispatcher (nextRunningThread->tid: %d)\n",nextRunningThread->tid);
 	#endif
   return   dispatcher(nextRunningThread);
 }
@@ -174,11 +178,10 @@ int scheduler(void) {
 
 */
 int dispatcher(TCB_t* nextRunningThread){
+  TCB_t* currentThread = controlBlock.runningThread;
 	#if DEBUG
-  	printf("[DISPATCHER] - init \n");
-	#endif
-  TCB_t* currentThread = (TCB_t*) &controlBlock.runningThread;
-
+    printf("[DISPATCHER] init- CurrentThread - TID[%d] - PRIO[%d] \n", currentThread->tid, currentThread->prio);
+    #endif
   /*Caso dispatcher esteja rodando pela primeira vez */
   if (controlBlock.isfirst == TRUE){
     currentThread->state = PROCST_APTO;
@@ -202,7 +205,9 @@ int dispatcher(TCB_t* nextRunningThread){
 
     //Altera a prioridade da thread
     currentThread->prio = currentThread->prio + stopTimer();
-    
+    #if DEBUG
+    printf("[DISPATCHER]- CurrentThread - TID[%d] - PRIO[%d] \n", currentThread->tid, currentThread->prio);
+    #endif
     switch(currentThread->state){
     
       case PROCST_TERMINO:
@@ -248,6 +253,10 @@ int dispatcher(TCB_t* nextRunningThread){
           #endif
           return -3;
         }
+		#if DEBUGFILA
+		printFila((PFILA2) &controlBlock.aptoThreads);
+		#endif
+
     }  
   }
 

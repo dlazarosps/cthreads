@@ -8,29 +8,28 @@
 
 
 void* func0(void *arg) {
-	printf("Eu sou a thread ID0 [0] imprimindo %d\n", controlBlock.runningThread->tid);
+	printf("[RODANDO] - função - thread TID:[%d] - 1 vez \n", controlBlock.runningThread->tid);
 	cyield();
-	printf("Eu sou a thread ID0 [1] imprimindo %d\n", controlBlock.runningThread->tid);
-	cyield();
-	printf("Eu sou a thread ID0 [2] imprimindo %d\n", controlBlock.runningThread->tid);
-	cyield();
-	printf("Eu sou a thread ID0 [3] imprimindo %d\n", controlBlock.runningThread->tid);
+	printf("[RODANDO] - função - thread TID:[%d] - 2 vez \n", controlBlock.runningThread->tid);
 	cyield();
 	return NULL;
 }
 
 void* func1(void *arg) {
-	printf("Eu sou a thread ID1 [0] imprimindo %d\n", controlBlock.runningThread->tid);
+	printf("[RODANDO] - função - thread TID:[%d] - 1 vez \n", controlBlock.runningThread->tid);
 	cyield();
-	printf("Eu sou a thread ID2 [1] imprimindo %d\n", controlBlock.runningThread->tid);
-	cyield();
-	printf("Eu sou a thread ID3 [2] imprimindo %d\n", controlBlock.runningThread->tid);
-	cyield();
-	printf("Eu sou a thread ID4 [3] imprimindo %d\n", controlBlock.runningThread->tid);
+	printf("[RODANDO] - função - thread TID:[%d] - 2 vez \n", controlBlock.runningThread->tid);
 	cyield();
 	return NULL;
 }
 
+void* func2(void *arg) {
+	printf("[RODANDO] - função - thread TID:[%d] - 1 vez \n", controlBlock.runningThread->tid);
+	cyield();
+	printf("[RODANDO] - função - thread TID:[%d] - 2 vez \n", controlBlock.runningThread->tid);
+	cyield();
+	return NULL;
+}
 
 int main() {
 
@@ -48,7 +47,7 @@ int main() {
   
   // >> INICIANDO A CRIAÇÃO DE DUAS THREAD PELA CCREATE << (CIDENTIFY + CCREATE)
   // Código aproveitado do exemplo.c localizado no diretório "exemplos" do projeto.
-	int	id0, id1;
+	int	id0, id1, id2;
 	int i;
 	
 	printf("\n >> Geração de duas threads através da CCREATE << \n");
@@ -60,8 +59,12 @@ int main() {
 	id1 = ccreate(func1, (void *)&i, 0);
 	printf("THREAD 2 criada: - TID %d \n", id1);
 
+	
+	id2 = ccreate(func2, (void *)&i, 0);
+	printf("THREAD 2 criada: - TID %d \n", id2);
+
 	printf("\n ----------- \n");
-	sleep(5);
+	sleep(1);
 
 
 	TCB_t * node;
@@ -85,14 +88,14 @@ int main() {
 
 	printf("\n ----------- \n");
 
-	sleep(5);
+	sleep(1);
 	
 	
   // ** FIM DO TESTE CIDENTIFY + CCREATE **
   
   // >> ATRIBUINDO CJOIN AS THREADS RECEM GERADAS << (CIDENTIFY + CCREATE + CJOIN)
 	printf("CJOIN na THREAD 1 (SUCESSO = 0): %d \n", cjoin(id0));
-	printf("CJOIN na THREAD 2 (SUCESSO = 0): %d \n", cjoin(id1));
+	//printf("CJOIN na THREAD 2 (SUCESSO = 0): %d \n", cjoin(id1));
   
   	
   // ** FIM DO TESTE CIDENTIFY + CCREATE + CJOIN **
