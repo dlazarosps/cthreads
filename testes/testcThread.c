@@ -9,7 +9,7 @@
 
 void* func0(void *arg) {
 	printf("Eu sou a thread ID0 imprimindo %d\n", controlBlock.runningThread->tid);
-	// return;
+	endThread();
 }
 
 void* func1(void *arg) {

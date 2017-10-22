@@ -76,6 +76,9 @@ int cinit(void) {
 
 
 void endThread(void){
+	#if DEBUG
+  	printf("[ENDTHREAD] - INIT. \n");
+	#endif
 	getcontext(&controlBlock.endThread);
 
 	// Caso exista desbloquei a thread que esperava o seu término
@@ -176,7 +179,9 @@ int dispatcher(TCB_t* nextRunningThread){
 
   /*Caso dispatcher esteja rodando pela primeira vez */
   if (controlBlock.isfirst == TRUE){
-
+	 #if DEBUG
+     printf("[DISPATCHER] dentro do if \n");
+     #endif
     currentThread->state = PROCST_APTO;
     // currentThread->prio = currentThread->prio+1;
     
@@ -195,6 +200,9 @@ int dispatcher(TCB_t* nextRunningThread){
     - não alterar o valor da prioridade incorretamente
     - e inserir na fila correta
     */
+	#if DEBUG
+     printf("[DISPATCHER] dentro do else (switch) \n");
+     #endif
 
     //Altera a prioridade da thread
     currentThread->prio = currentThread->prio + stopTimer();
@@ -202,9 +210,15 @@ int dispatcher(TCB_t* nextRunningThread){
     switch(currentThread->state){
     
       case PROCST_TERMINO:
+		#if DEBUG
+        printf("[DISPATCHER] - CASE PROCST_TERMINO \n");
+        #endif
         break;
     // Caso a thread esteja foi bloqueda insere na fila de bloqueadas
       case PROCST_BLOQ:
+		#if DEBUG
+        printf("[DISPATCHER] - CASE PROCST_BLOQ \n");
+        #endif
         if(insertFILA2((PFILA2) &controlBlock.blockedThreads, (void *) currentThread) != 0){
           #if DEBUG
             printf("[ERRO] dispatcher - CASE BLOQ - Não inserida em blockedThreads \n");
@@ -217,6 +231,9 @@ int dispatcher(TCB_t* nextRunningThread){
       case PROCST_APTO:
       case PROCST_EXEC:
       default:
+		#if DEBUG
+        printf("[DISPATCHER] - CASE PROCST_APTO PROCST_EXEC DEFAULT\n");
+        #endif
         currentThread->state = PROCST_APTO;
         if(insertByPrio((PFILA2) &controlBlock.aptoThreads, currentThread)!=0){
           #if DEBUG
@@ -229,10 +246,9 @@ int dispatcher(TCB_t* nextRunningThread){
 
   //efetua a troca de contexto running <-> next
   controlBlock.runningThread = nextRunningThread;
-  swapcontext(&currentThread->context, &nextRunningThread->context);
   //inicia o timer da prioridade
   startTimer();
-
+  swapcontext(&currentThread->context, &nextRunningThread->context);
   return 0;
 }
 
