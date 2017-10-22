@@ -14,6 +14,7 @@ void* func0(void *arg) {
 
 void* func1(void *arg) {
 	printf("Eu sou a thread ID1 imprimindo %d\n", controlBlock.runningThread->tid);
+	endThread();
 	// return;
 }
 
