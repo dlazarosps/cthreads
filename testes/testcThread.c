@@ -8,14 +8,27 @@
 
 
 void* func0(void *arg) {
-	printf("Eu sou a thread ID0 imprimindo %d\n", controlBlock.runningThread->tid);
-	endThread();
+	printf("Eu sou a thread ID0 [0] imprimindo %d\n", controlBlock.runningThread->tid);
+	cyield();
+	printf("Eu sou a thread ID0 [1] imprimindo %d\n", controlBlock.runningThread->tid);
+	cyield();
+	printf("Eu sou a thread ID0 [2] imprimindo %d\n", controlBlock.runningThread->tid);
+	cyield();
+	printf("Eu sou a thread ID0 [3] imprimindo %d\n", controlBlock.runningThread->tid);
+	cyield();
+	return NULL;
 }
 
 void* func1(void *arg) {
-	printf("Eu sou a thread ID1 imprimindo %d\n", controlBlock.runningThread->tid);
-	endThread();
-	// return;
+	printf("Eu sou a thread ID1 [0] imprimindo %d\n", controlBlock.runningThread->tid);
+	cyield();
+	printf("Eu sou a thread ID2 [1] imprimindo %d\n", controlBlock.runningThread->tid);
+	cyield();
+	printf("Eu sou a thread ID3 [2] imprimindo %d\n", controlBlock.runningThread->tid);
+	cyield();
+	printf("Eu sou a thread ID4 [3] imprimindo %d\n", controlBlock.runningThread->tid);
+	cyield();
+	return NULL;
 }
 
 
