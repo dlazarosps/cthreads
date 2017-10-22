@@ -306,6 +306,7 @@ int csignal(csem_t *sem) {
     FirstFila2(sem->fila);
     TCB_t *aux;
     aux = GetAtIteratorFila2(sem->fila);
+	printf("THREAD PELA CSIGNAL: %p\n", aux);
     if (aux==NULL){
         return -1;
     }
