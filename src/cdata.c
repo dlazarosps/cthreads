@@ -76,6 +76,9 @@ int cinit(void) {
 
 
 void endThread(void){
+	#if DEBUG
+  	printf("[ENDTHREAD] - init - TID [%i] \n", controlBlock.runningThread->tid);
+	#endif
 	getcontext(&controlBlock.endThread);
 
 	// Caso exista desbloquei a thread que esperava o seu término
@@ -93,12 +96,18 @@ void endThread(void){
 }
 
 void releaseThreadJoin(void){
+	#if DEBUG
+	printf("[releaseThreadJoin] releaseThreadJoin - looking for TID[%d] \n", controlBlock.runningThread->tidJoinWait);
+	#endif
 	if (controlBlock.runningThread->tidJoinWait >= 0){
-	TCB_t* unblocked; 
+		TCB_t* unblocked; 
 		//procura thread na fila blockedThreads
-		  if(searchFILA2((PFILA2) &controlBlock.blockedThreads, controlBlock.runningThread->tidJoinWait, TRUE) == TRUE) {
+		  if(searchFILA2(controlBlock.blockedThreads, controlBlock.runningThread->tidJoinWait, TRUE) == TRUE) {
 			unblocked = (TCB_t*) GetAtIteratorFila2((PFILA2) &controlBlock.blockedThreads);
 			if(unblocked->prio == PROCST_BLOQ){
+				#if DEBUG
+				printf("[releaseThreadJoin] try delete TID[%d] from Blocked \n", controlBlock.runningThread->tidJoinWait);
+				#endif
 				if(DeleteAtIteratorFila2((PFILA2) &controlBlock.blockedThreads)== 0){ //Remove da fila de Blocked
 					unblocked->prio = PROCST_APTO;
 					insertByPrio((PFILA2) &controlBlock.aptoThreads, unblocked); //Adiciona na fila de APTO
@@ -135,14 +144,17 @@ int generateTID(void) {
 */
 int scheduler(void) {
 	#if DEBUG
-    printf("[SCHEDULER]- RunningThread - TID[%d] - PRIO[%d] \n", controlBlock.runningThread->tid, controlBlock.runningThread->prio);
+    printf("[SCHEDULER]- RunningThread - TID[%d] - PRIO[%d] - STATE[%d] \n", controlBlock.runningThread->tid, controlBlock.runningThread->prio, controlBlock.runningThread->state);
 	#endif
 	#if DEBUGFILA
-	printFila((PFILA2) &controlBlock.aptoThreads);
+	printFila();
 	#endif
   TCB_t* nextRunningThread;
   if (FirstFila2((PFILA2) &controlBlock.aptoThreads) == 0) {
     nextRunningThread = (TCB_t*) GetAtIteratorFila2((PFILA2) &controlBlock.aptoThreads);
+	#if DEBUG
+    printf("[SCHEDULER]- Removendo TID[%d] da fila de APTOS \n", nextRunningThread->tid );
+    #endif
     if(DeleteAtIteratorFila2((PFILA2) &controlBlock.aptoThreads) != 0){
     
       #if DEBUG
@@ -151,6 +163,9 @@ int scheduler(void) {
 
       return -1;
     }
+	#if DEBUGFILA
+	printFila();
+	#endif
 	
   } 
   else {
@@ -180,31 +195,22 @@ int scheduler(void) {
 int dispatcher(TCB_t* nextRunningThread){
   TCB_t* currentThread = controlBlock.runningThread;
 	#if DEBUG
-    printf("[DISPATCHER] init- CurrentThread - TID[%d] - PRIO[%d] \n", currentThread->tid, currentThread->prio);
+    printf("[DISPATCHER] init- CurrentThread - TID[%d] - PRIO[%d] - STATE[%d] \n", currentThread->tid, currentThread->prio, currentThread->state);
     #endif
   /*Caso dispatcher esteja rodando pela primeira vez */
-  if (controlBlock.isfirst == TRUE){
-    currentThread->state = PROCST_APTO;
-    // currentThread->prio = currentThread->prio+1;
-    
-    if(insertByPrio((PFILA2) &controlBlock.aptoThreads, currentThread) != 0){
-      #if DEBUG
-        printf("[ERRO] dispatcher - FIRST - Não inserida em Aptos \n");
-      #endif
-      return -1;
-    }  
-    //Desativa flag
+  if (controlBlock.isfirst == TRUE){ 
     controlBlock.isfirst = FALSE;
-
   }
   else{
+	  currentThread->prio = currentThread->prio + stopTimer();
+  }
     /* controle para:
     - não alterar o valor da prioridade incorretamente
     - e inserir na fila correta
     */
 
     //Altera a prioridade da thread
-    currentThread->prio = currentThread->prio + stopTimer();
+    
     #if DEBUG
     printf("[DISPATCHER]- CurrentThread - TID[%d] - PRIO[%d] \n", currentThread->tid, currentThread->prio);
     #endif
@@ -231,12 +237,15 @@ int dispatcher(TCB_t* nextRunningThread){
 		    #if DEBUG
         printf("[DISPATCHER] - CASE PROCST_BLOQ \n");
         #endif
-        if(insertFILA2((PFILA2) &controlBlock.blockedThreads, (void *) currentThread) != 0){
+        if(LastFila2((PFILA2) &controlBlock.blockedThreads) != 0 && insertFILA2((PFILA2) &controlBlock.blockedThreads, (void *) currentThread) != 0){
           #if DEBUG
             printf("[ERRO] dispatcher - CASE BLOQ - Não inserida em blockedThreads \n");
           #endif
             return -2;
         }
+		#if DEBUGFILA
+		printFila();
+		#endif
         break;
 
     //Caso a thread esteja é apta ou estava executando insere na fila de aptas
@@ -254,12 +263,11 @@ int dispatcher(TCB_t* nextRunningThread){
           return -3;
         }
 		#if DEBUGFILA
-		printFila((PFILA2) &controlBlock.aptoThreads);
+		printFila();
 		#endif
-
+		break;
     }  
-  }
-
+  
   controlBlock.runningThread = nextRunningThread;
   //inicia o timer da prioridade
   startTimer();
