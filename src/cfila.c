@@ -96,6 +96,9 @@ int searchFILA2(PFILA2 fila, int tid, int resetIterator) {
     }
   } while(!found && !finished);
 
+  #if DEBUG
+    printf("\n RETURN searchFILA2.\n");
+  #endif
   return status;
 }
 
@@ -104,17 +107,28 @@ int searchFILA2(PFILA2 fila, int tid, int resetIterator) {
 	Remove um elemento de fila a partir do tid.
 */
 int removeFILA2(PFILA2 fila, int tid) {
+
+  #if DEBUG
+    printf("\n INIT removeFILA2.\n");
+  #endif
+
   int found = searchFILA2(fila, tid, TRUE);
   int status = 0;
 
   if(found == TRUE) {
+    #if DEBUG
+      printf("\n FOUND  removeFILA2.\n");
+    #endif
       status = DeleteAtIteratorFila2(fila);
+        #if DEBUG
+          printf("[STATUS] - removeFILA2 - DeleteAtIteratorFila2 = %d.\n", status);
+        #endif
       
       if(status != 0){
         
         #if DEBUG
-          printf("[ERRO] - removeFILA2 - %d.\n", status);
-        #endif
+          printf("[ERRO] - removeFILA2 - DeleteAtIteratorFila2 = %d.\n", status);
+        #endif  
         
         found = FALSE;
       }
