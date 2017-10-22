@@ -287,21 +287,28 @@ int csignal(csem_t *sem) {
     cinit();
   }
   sem->count++;
-  if (sem->count>0){
+  if (sem->count > 0){
     return 0;
   }
   else{
-    FirstFila2(sem->fila);
-    TCB_t *aux;
-    aux = GetAtIteratorFila2(sem->fila);
-	printf("THREAD PELA CSIGNAL: %p\n", aux);
-    if (aux==NULL){
-        return -1;
-    }
-    DeleteAtIteratorFila2(sem->fila); // Tira a thread da fila de semaforo.
-    aux->state = PROCST_APTO;	// Coloca a thread no estado de APTO.
-    insertByPrio((PFILA2) &controlBlock.aptoThreads, aux); // Insere a thread na fila de APTOS de acordo com a prioridade.
-    return 0;
+    if(FirstFila2(sem->fila)==0){
+		TCB_t *aux;
+		aux = GetAtIteratorFila2(sem->fila);
+		printf("THREAD PELA CSIGNAL: %p\n", aux);
+		if (aux==NULL){
+			sem->count--;
+			return -1;
+		}
+		DeleteAtIteratorFila2(sem->fila); // Tira a thread da fila de semaforo.
+		aux->state = PROCST_APTO;	// Coloca a thread no estado de APTO.
+		insertByPrio((PFILA2) &controlBlock.aptoThreads, aux); // Insere a thread na fila de APTOS de acordo com a prioridade.
+		return 0;
+	}else{
+		#if DEBUG
+		printf("[ERRO] - csignal - fila semafaro vazia \n");
+		#endif
+		return -1;
+	}
   }
 };
 

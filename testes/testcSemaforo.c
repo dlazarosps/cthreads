@@ -46,7 +46,7 @@ int main() {
 	TCB_t* thread;
 	if(FirstFila2((PFILA2) &controlBlock.aptoThreads) == 0){
 		thread = (TCB_t*) GetAtIteratorFila2((PFILA2) &controlBlock.aptoThreads);
-		printf("SELECIONANDO A THREAD: %p\n", thread);
+		printf("SELECIONANDO A THREAD: %p\n", thread->tid);
 		removeFILA2((PFILA2) &controlBlock.aptoThreads, id0);
 		if (insertFILA2((PFILA2) &semaforo->fila, thread) == 0){
 				// >> CHAMADA DA CSIGNAL PARA LIBERACAO DE RECURSO << (CCREATE + CSEM_INIT + CSIGNAL)
