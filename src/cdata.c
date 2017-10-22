@@ -95,9 +95,9 @@ void endThread(void){
 void releaseThreadJoin(void){
 	if (controlBlock.runningThread->tidJoinWait >= 0){
 	TCB_t* unblocked; 
-		//procura thread na fila allThreads
-		  if(searchFILA2(&controlBlock.allThreads, controlBlock.runningThread->tidJoinWait, TRUE) == TRUE) {
-			unblocked = (TCB_t*) GetAtIteratorFila2(&controlBlock.allThreads);
+		//procura thread na fila blockedThreads
+		  if(searchFILA2((PFILA2) &controlBlock.blockedThreads, controlBlock.runningThread->tidJoinWait, TRUE) == TRUE) {
+			unblocked = (TCB_t*) GetAtIteratorFila2((PFILA2) &controlBlock.blockedThreads);
 			if(unblocked->prio == PROCST_BLOQ){
 				if(DeleteAtIteratorFila2((PFILA2) &controlBlock.blockedThreads)== 0){ //Remove da fila de Blocked
 					unblocked->prio = PROCST_APTO;
