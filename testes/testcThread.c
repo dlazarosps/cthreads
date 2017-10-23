@@ -9,9 +9,6 @@
 
 void* func0(void *arg) {
 	printf("[RODANDO] - função - thread TID:[%d] - 1 vez \n", controlBlock.runningThread->tid);
-	cyield();
-	printf("[RODANDO] - função - thread TID:[%d] - 2 vez \n", controlBlock.runningThread->tid);
-	cyield();
 	return NULL;
 }
 
@@ -94,7 +91,7 @@ int main() {
   // ** FIM DO TESTE CIDENTIFY + CCREATE **
   
   // >> ATRIBUINDO CJOIN AS THREADS RECEM GERADAS << (CIDENTIFY + CCREATE + CJOIN)
-	printf("CJOIN na THREAD 1 (SUCESSO = 0): %d \n", cjoin(id0));
+	printf("CJOIN na THREAD 1 (SUCESSO = 0): %d \n", cyield());
 	//printf("CJOIN na THREAD 2 (SUCESSO = 0): %d \n", cjoin(id1));
   
   	

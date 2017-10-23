@@ -76,6 +76,9 @@ int cinit(void) {
 
 
 void endThread(void){
+	#if DEBUG
+      printf("[ENDTHREAD] Thread - TID[%d] - STATE[%d] \n",controlBlock.runningThread->tid, controlBlock.runningThread->state);
+    #endif
 	getcontext(&controlBlock.endThread);
 
 	// Caso exista desbloquei a thread que esperava o seu término
@@ -93,6 +96,9 @@ void endThread(void){
 }
 
 void releaseThreadJoin(void){
+	#if DEBUG
+      printf("[releaseThreadJoin] unblocking - TID[%d]\n",controlBlock.runningThread->tidJoinWait);
+    #endif
 	if (controlBlock.runningThread->tidJoinWait >= 0){
 	TCB_t* unblocked; 
 		//procura thread na fila blockedThreads
@@ -137,9 +143,6 @@ int scheduler(void) {
 	#if DEBUG
     printf("[SCHEDULER]- RunningThread - TID[%d] - PRIO[%d] \n", controlBlock.runningThread->tid, controlBlock.runningThread->prio);
 	#endif
-	#if DEBUGFILA
-	printFila((PFILA2) &controlBlock.aptoThreads);
-	#endif
   TCB_t* nextRunningThread;
   if (FirstFila2((PFILA2) &controlBlock.aptoThreads) == 0) {
     nextRunningThread = (TCB_t*) GetAtIteratorFila2((PFILA2) &controlBlock.aptoThreads);
@@ -180,7 +183,7 @@ int scheduler(void) {
 int dispatcher(TCB_t* nextRunningThread){
   TCB_t* currentThread = controlBlock.runningThread;
 	#if DEBUG
-    printf("[DISPATCHER] init- CurrentThread - TID[%d] - PRIO[%d] \n", currentThread->tid, currentThread->prio);
+    printf("[DISPATCHER] CurrentThread - TID[%d] - PRIO[%d] <-> NextRunningThread - TID[%d] - PRIO[%d]\n", currentThread->tid, currentThread->prio, nextRunningThread->tid, nextRunningThread->prio);
     #endif
   /*Caso dispatcher esteja rodando pela primeira vez */
   if (controlBlock.isfirst == TRUE){
@@ -206,7 +209,7 @@ int dispatcher(TCB_t* nextRunningThread){
     //Altera a prioridade da thread
     currentThread->prio = currentThread->prio + stopTimer();
     #if DEBUG
-    printf("[DISPATCHER]- CurrentThread - TID[%d] - PRIO[%d] \n", currentThread->tid, currentThread->prio);
+    printf("[DISPATCHER]- CurrentThread New Prio- TID[%d] - PRIO[%d] \n", currentThread->tid, currentThread->prio);
     #endif
     switch(currentThread->state){
     
@@ -253,10 +256,6 @@ int dispatcher(TCB_t* nextRunningThread){
           #endif
           return -3;
         }
-		#if DEBUGFILA
-		printFila((PFILA2) &controlBlock.aptoThreads);
-		#endif
-
     }  
   }
 

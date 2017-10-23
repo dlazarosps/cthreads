@@ -12,6 +12,5 @@ int initFILA2(PFILA2 fila, int isPointer);
 int insertFILA2(PFILA2 fila, void* element);
 int searchFILA2(PFILA2 fila, int tid, int resetIterator);
 int removeFILA2(PFILA2 fila, int tid);
-int printFila(PFILA2 fila);
 
 #endif
