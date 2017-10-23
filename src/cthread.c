@@ -187,9 +187,7 @@ int cjoin(int tid) {
   // sinaliza que existe uma Thread esperando pelo termino dela
   waitThread->tidJoinWait = controlBlock.runningThread->tid;  
   controlBlock.runningThread->state = PROCST_BLOQ;  
-  #if DEBUG
-	printf("[CJOIN] runningThread->state [%d]\n", controlBlock.runningThread->state);
-  #endif
+  
   // troca de  threads / contexto
   return scheduler();
 };

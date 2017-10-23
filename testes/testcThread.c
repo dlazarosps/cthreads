@@ -9,11 +9,25 @@
 
 void* func0(void *arg) {
 	printf("[RODANDO] - função - thread TID:[%d] - 1 vez \n", controlBlock.runningThread->tid);
+	cyield();
+	printf("[RODANDO] - função - thread TID:[%d] - 2 vez \n", controlBlock.runningThread->tid);
+	cyield();
 	return NULL;
 }
 
 void* func1(void *arg) {
 	printf("[RODANDO] - função - thread TID:[%d] - 1 vez \n", controlBlock.runningThread->tid);
+	cyield();
+	printf("[RODANDO] - função - thread TID:[%d] - 2 vez \n", controlBlock.runningThread->tid);
+	cyield();
+	return NULL;
+}
+
+void* func2(void *arg) {
+	printf("[RODANDO] - função - thread TID:[%d] - 1 vez \n", controlBlock.runningThread->tid);
+	cyield();
+	printf("[RODANDO] - função - thread TID:[%d] - 2 vez \n", controlBlock.runningThread->tid);
+	cyield();
 	return NULL;
 }
 
@@ -33,7 +47,7 @@ int main() {
   
   // >> INICIANDO A CRIAÇÃO DE DUAS THREAD PELA CCREATE << (CIDENTIFY + CCREATE)
   // Código aproveitado do exemplo.c localizado no diretório "exemplos" do projeto.
-	int	id0, id1;
+	int	id0, id1, id2;
 	int i;
 	
 	printf("\n >> Geração de duas threads através da CCREATE << \n");
@@ -44,6 +58,10 @@ int main() {
 
 	id1 = ccreate(func1, (void *)&i, 0);
 	printf("THREAD 2 criada: - TID %d \n", id1);
+
+	
+	id2 = ccreate(func2, (void *)&i, 0);
+	printf("THREAD 2 criada: - TID %d \n", id2);
 
 	printf("\n ----------- \n");
 	sleep(1);

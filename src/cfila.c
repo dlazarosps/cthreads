@@ -137,27 +137,18 @@ int removeFILA2(PFILA2 fila, int tid) {
   return found;
 }
 
-void printFila(){
+void printFila(PFILA2 fila){
 	TCB_t * node;
-	if(FirstFila2((PFILA2) &controlBlock.aptoThreads) == 0){
+	if(FirstFila2(fila) == 0){
 		node = (TCB_t*) GetAtIteratorFila2((PFILA2) &controlBlock.aptoThreads);
-		printf("-------------------------------------------------------------------------- \n");
-		printf("\t Print FILA [APTOS]\n");
-		printf("Pointer: %p - TID: %d - Prio = %d - State = %d \n", node, node->tid, node->prio, node->state);
-		while(NextFila2((PFILA2) &controlBlock.aptoThreads)==0){
+		printf("-------------------------------------------------- \n");
+		printf("\t Print FILA \n");
+		printf("-------------------------------------------------- \n");
+		printf("Pointer: %p - TID: %d - Prio = %d \n", node, node->tid, node->prio);
+		while(NextFila2(fila)==0){
 			node = (TCB_t*) GetAtIteratorFila2((PFILA2) &controlBlock.aptoThreads);
-			printf("Pointer: %p - TID: %d - Prio = %d - State = %d \n", node, node->tid, node->prio, node->state);
+			printf("Pointer: %p - TID: %d - Prio = %d \n", node, node->tid, node->prio);
 		}
 	}
-	
-	if(FirstFila2((PFILA2) &controlBlock.blockedThreads) == 0){
-		node = (TCB_t*) GetAtIteratorFila2((PFILA2) &controlBlock.blockedThreads);
-		printf("\n\t Print FILA [BLOCK]\n");
-		printf("Pointer: %p - TID: %d - Prio = %d - State = %d \n", node, node->tid, node->prio, node->state);
-		while(NextFila2((PFILA2) &controlBlock.blockedThreads)==0){
-			node = (TCB_t*) GetAtIteratorFila2((PFILA2) &controlBlock.blockedThreads);
-			printf("Pointer: %p - TID: %d - Prio = %d - State = %d \n", node, node->tid, node->prio, node->state);
-		}
-	}
-		printf("-------------------------------------------------------------------------- \n");
+	printf("-------------------------------------------------- \n");
 }
