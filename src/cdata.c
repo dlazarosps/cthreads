@@ -62,10 +62,10 @@ int cinit(void) {
   mainThread->context.uc_stack.ss_sp = (char*) malloc(SIGSTKSZ);
   mainThread->context.uc_stack.ss_size = SIGSTKSZ;
 
- //insere na allthreads só após copia de contexto 
+ //insere na allthreads só após copia de contexto
   controlBlock.runningThread = mainThread;
 
-  if (insertFILA2(&controlBlock.allThreads, (void *) mainThread) != 0){
+  if (insertFILA2(&controlBlock.allThreads, &mainThread) != 0){
     #if DEBUG
       printf("[ERRO] cinit - insert - Não inserida em allThreads \n");
     #endif
@@ -85,14 +85,14 @@ void endThread(void){
 
 	// Caso exista desbloquei a thread que esperava o seu término
 	releaseThreadJoin();
-  
+
 	// Delete thread from blocking threads
 	controlBlock.runningThread->state = PROCST_TERMINO;
 
 	#if DEBUG
   	printf("TID: %i has ended. \n", controlBlock.runningThread->tid);
 	#endif
-  
+
     //Põe a rodar a proxima thread
 	scheduler();
 }
@@ -102,7 +102,7 @@ void releaseThreadJoin(void){
       printf("[releaseThreadJoin] unblocking - TID[%d]\n",controlBlock.runningThread->tidJoinWait);
     #endif
 	if (controlBlock.runningThread->tidJoinWait >= 0){
-	TCB_t* unblocked; 
+	TCB_t* unblocked;
 		//procura thread na fila blockedThreads
 		  if(searchFILA2((PFILA2) &controlBlock.blockedThreads, controlBlock.runningThread->tidJoinWait, TRUE) == TRUE) {
 			unblocked = (TCB_t*) GetAtIteratorFila2((PFILA2) &controlBlock.blockedThreads);
@@ -149,34 +149,28 @@ int scheduler(void) {
   if (FirstFila2((PFILA2) &controlBlock.aptoThreads) == 0) {
     nextRunningThread = (TCB_t*) GetAtIteratorFila2((PFILA2) &controlBlock.aptoThreads);
     if(DeleteAtIteratorFila2((PFILA2) &controlBlock.aptoThreads) != 0){
-    
+
       #if DEBUG
         printf("[ERRO] scheduler - removeFILA2 - Não removida \n");
       #endif
 
       return -1;
     }
-	
-  } 
+
+  }
   else {
 
   	#if DEBUG
   	printf("[ERRO] scheduler - Não encontrada nenhuma thread Apta\n");
   	#endif
 
-    //caso não tenha nenhuma thread apta continua executando a q estava
-    if (controlBlock.runningThread->state != PROCST_TERMINO)
-    {
-      nextRunningThread = controlBlock.runningThread;
-    }
-    else{
-      return -2;
-    }
+    nextRunningThread = controlBlock.runningThread;
+
 
   }
   nextRunningThread->state = PROCST_EXEC;
 	#if DEBUG
-  	printf("[scheduler] - call dispatcher (nextRunningThread->tid: %d)\n",nextRunningThread->tid);
+  	printf("[scheduler] - call dispatcher (nextRunningThread->tid: %d) \n",nextRunningThread->tid);
 	#endif
   return   dispatcher(nextRunningThread);
 }
@@ -188,7 +182,7 @@ int scheduler(void) {
 
 */
 int dispatcher(TCB_t* nextRunningThread){
-  TCB_t* currentThread = controlBlock.runningThread;
+  TCB_t* currentThread = (TCB_t*) &controlBlock.runningThread;
 	#if DEBUG
     printf("[DISPATCHER] CurrentThread - TID[%d] - PRIO[%d] <-> NextRunningThread - TID[%d] - PRIO[%d]\n", currentThread->tid, currentThread->prio, nextRunningThread->tid, nextRunningThread->prio);
     #endif
@@ -196,15 +190,16 @@ int dispatcher(TCB_t* nextRunningThread){
   if (controlBlock.isfirst == TRUE){
     currentThread->state = PROCST_APTO;
     currentThread->prio = currentThread->prio+1;
-    
+
     if(insertByPrio((PFILA2) &controlBlock.aptoThreads, currentThread) != 0){
       #if DEBUG
         printf("[ERRO] dispatcher - FIRST - Não inserida em Aptos \n");
       #endif
       return -1;
-    }  
+    }
     //Desativa flag
     controlBlock.isfirst = FALSE;
+  	printf("[scheduler] - call dispatcher (nextRunningThread->tid): %d \n",nextRunningThread->tid);
 
   }
   else{
@@ -214,12 +209,14 @@ int dispatcher(TCB_t* nextRunningThread){
     */
 
     //Altera a prioridade da thread
+
     currentThread->prio = currentThread->prio + stopTimer();
     #if DEBUG
     printf("[DISPATCHER]- CurrentThread New Prio- TID[%d] - PRIO[%d] \n", currentThread->tid, currentThread->prio);
     #endif
+
     switch(currentThread->state){
-    
+
       case PROCST_TERMINO:
 		    #if DEBUG
         printf("[DISPATCHER] - CASE PROCST_TERMINO \n");
@@ -230,7 +227,7 @@ int dispatcher(TCB_t* nextRunningThread){
         free(currentThread);
 
         if (nextRunningThread != currentThread){ //se for diferente
-          
+
           startTimer();
           setcontext(&nextRunningThread->context); //contexto da proxima
           return 0;
@@ -253,23 +250,25 @@ int dispatcher(TCB_t* nextRunningThread){
       case PROCST_APTO:
       case PROCST_EXEC:
       default:
-		#if DEBUG
+		    #if DEBUG
         printf("[DISPATCHER] - CASE PROCST_APTO PROCST_EXEC DEFAULT\n");
         #endif
         currentThread->state = PROCST_APTO;
-        if(insertByPrio((PFILA2) &controlBlock.aptoThreads, currentThread)!=0){
+        if(insertByPrio((PFILA2) &controlBlock.aptoThreads, (void *) currentThread)!=0){
           #if DEBUG
             printf("[ERRO] dispatcher - CASE default - Não inserida em Aptos \n");
           #endif
           return -3;
         }
-    }  
+        break;
+    }
   }
 
   controlBlock.runningThread = nextRunningThread;
+
   //inicia o timer da prioridade
   startTimer();
-  
+
   //efetua a troca de contexto running <-> next
   swapcontext(&currentThread->context, &nextRunningThread->context);
 
@@ -288,7 +287,7 @@ Ret:  ==0, se conseguiu
 --------------------------------------------------------------------*/
 int insertByPrio(PFILA2 pfila, TCB_t *tcb) {
   TCB_t *tcb_it;
-  
+
   // pfile vazia?
   if (FirstFila2(pfila)==0) {
     do {
@@ -297,6 +296,6 @@ int insertByPrio(PFILA2 pfila, TCB_t *tcb) {
         return InsertBeforeIteratorFila2(pfila, tcb);
       }
     } while (NextFila2(pfila)==0);
-  } 
+  }
   return AppendFila2(pfila, (void *)tcb);
 }
