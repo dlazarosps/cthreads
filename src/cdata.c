@@ -65,7 +65,7 @@ int cinit(void) {
  //insere na allthreads só após copia de contexto
   controlBlock.runningThread = mainThread;
 
-  if (insertFILA2(&controlBlock.allThreads, &mainThread) != 0){
+  if (insertFILA2(&controlBlock.allThreads, (void *) mainThread) != 0){
     #if DEBUG
       printf("[ERRO] cinit - insert - Não inserida em allThreads \n");
     #endif
@@ -164,7 +164,13 @@ int scheduler(void) {
   	printf("[ERRO] scheduler - Não encontrada nenhuma thread Apta\n");
   	#endif
 
-    nextRunningThread = controlBlock.runningThread;
+     if (controlBlock.runningThread->state != PROCST_TERMINO)		 
+     {		
+       nextRunningThread = controlBlock.runningThread;		
+     }		
+     else{		
+       return -2;		
+     }
 
 
   }
@@ -199,7 +205,7 @@ int dispatcher(TCB_t* nextRunningThread){
     }
     //Desativa flag
     controlBlock.isfirst = FALSE;
-  	printf("[scheduler] - call dispatcher (nextRunningThread->tid): %d \n",nextRunningThread->tid);
+  	
 
   }
   else{
