@@ -44,13 +44,6 @@ int cinit(void) {
   mainThread->state = PROCST_EXEC;
   mainThread->prio = 0;
 
-  if (insertFILA2(&controlBlock.allThreads, (void *) mainThread) != 0){
-    #if DEBUG
-      printf("[ERRO] cinit - insert - Não inserida em allThreads \n");
-    #endif
-    return -4;
-  }
-
   /*
     Set ending function for all created threads
   */
@@ -64,12 +57,21 @@ int cinit(void) {
     Create context to main thread
     Set Main thread as running
   */
-  controlBlock.runningThread = mainThread;
-
   getcontext(&mainThread->context);
   mainThread->context.uc_link =  &controlBlock.endThread;
   mainThread->context.uc_stack.ss_sp = (char*) malloc(SIGSTKSZ);
   mainThread->context.uc_stack.ss_size = SIGSTKSZ;
+
+ //insere na allthreads só após copia de contexto 
+  controlBlock.runningThread = mainThread;
+
+  if (insertFILA2(&controlBlock.allThreads, (void *) mainThread) != 0){
+    #if DEBUG
+      printf("[ERRO] cinit - insert - Não inserida em allThreads \n");
+    #endif
+    return -4;
+  }
+
 
   return 0;
 };
@@ -163,9 +165,14 @@ int scheduler(void) {
   	#endif
 
     //caso não tenha nenhuma thread apta continua executando a q estava
-    nextRunningThread = controlBlock.runningThread;
+    if (controlBlock.runningThread->state != PROCST_TERMINO)
+    {
+      nextRunningThread = controlBlock.runningThread;
+    }
+    else{
+      return -2;
+    }
 
-    // return -2;
   }
   nextRunningThread->state = PROCST_EXEC;
 	#if DEBUG
@@ -188,7 +195,7 @@ int dispatcher(TCB_t* nextRunningThread){
   /*Caso dispatcher esteja rodando pela primeira vez */
   if (controlBlock.isfirst == TRUE){
     currentThread->state = PROCST_APTO;
-    // currentThread->prio = currentThread->prio+1;
+    currentThread->prio = currentThread->prio+1;
     
     if(insertByPrio((PFILA2) &controlBlock.aptoThreads, currentThread) != 0){
       #if DEBUG
