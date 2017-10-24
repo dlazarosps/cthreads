@@ -216,14 +216,11 @@ int csem_init(csem_t *sem, int count) {
 	}
 
 	sem->count = count;
-	sem->fila = (PFILA2) malloc(sizeof(PFILA2));
-	/* Se foi alocada ... */
-	if (sem->fila == NULL)
-		return -1;
-	/* Cria a fila, se == 0 tudo ok, caso contrario -1 */
-	if(CreateFila2(sem->fila) == 0)
-		return 0;
-	
+  if (initFILA2(sem->fila, TRUE))
+  {
+    return 0;
+  }
+  else
     return -1;
 };
 
@@ -253,22 +250,21 @@ int cwait(csem_t *sem) {
   
   // Verifica o valor de count. Se menor, a thread é bloqueada e colocada na fila 
   // de semaforos.
-  if(sem->count > 0){
-    sem->count--;
-	#if DEBUG
-    printf("[CWAIT] count > 0 \n");
+  sem->count--;
+  if(sem->count < 0){
+	  #if DEBUG
+    printf("[CWAIT] count < 0 \n");
     #endif
-    return 0;
+
+    RunningThread->state = PROCST_BLOQ; // Altera seu estado para BLOQUEADO.
+    
+    if(AppendFila2(sem->fila, (void *) RunningThread)==0){
+      sem->count--; //Variável count cai uma unidade.
+      scheduler(); // Seleciona a próxima thread a ser executada.
+      return 0;
+    }
   }
-  else{
-        if(AppendFila2(sem->fila, (void *) RunningThread)==0){
-            sem->count--; //Variável count cai uma unidade.
-            RunningThread->state = PROCST_BLOQ; // Altera seu estado para BLOQUEADO.
-            scheduler(); // Seleciona a próxima thread a ser executada.
-            return 0;
-        }
-  }
-    return -1;
+  return -1;    
 };
 
 
@@ -288,29 +284,25 @@ int csignal(csem_t *sem) {
     cinit();
   }
   sem->count++;
-  if (sem->count > 0){
-    return 0;
-  }
-  else{
-    if(FirstFila2(sem->fila)==0){
+  if(FirstFila2(sem->fila)==0){
 		TCB_t *aux;
 		aux = GetAtIteratorFila2(sem->fila);
 		printf("THREAD PELA CSIGNAL: %p\n", aux);
-		if (aux==NULL){
+	if (aux==NULL){
 			sem->count--;
 			return -1;
-		}
+	}
 		DeleteAtIteratorFila2(sem->fila); // Tira a thread da fila de semaforo.
 		aux->state = PROCST_APTO;	// Coloca a thread no estado de APTO.
 		insertByPrio((PFILA2) &controlBlock.aptoThreads, aux); // Insere a thread na fila de APTOS de acordo com a prioridade.
 		return 0;
-	}else{
+	}
+  else{
 		#if DEBUG
 		printf("[ERRO] - csignal - fila semafaro vazia \n");
 		#endif
 		return -1;
 	}
-  }
 };
 
 
