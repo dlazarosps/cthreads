@@ -33,7 +33,8 @@ int ccreate (void* (*start)(void*), void *arg, int prio) {
   newThread->tid = generateTID(); // Gera um TID exclusivo a thread
   newThread->state = PROCST_APTO; // Coloca um estado a thread
   newThread->prio = prio; // Prioridade da thread.
-  newThread->tidJoinWait = -1; 
+  newThread->tidJoinWait = -1;
+  // newThread->teste = "TESTE 1"; 
 
   getcontext(&newThread->context);
 

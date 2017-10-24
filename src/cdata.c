@@ -37,12 +37,12 @@ int cinit(void) {
     Creates the main thread.
     Appends it to the allThreads structure.
   */
-  TCB_t *mainThread;
+  // TCB_t *mainThread;
 
-  mainThread = (TCB_t*) malloc(sizeof(TCB_t));
-  mainThread->tid = 0;
-  mainThread->state = PROCST_EXEC;
-  mainThread->prio = 0;
+  controlBlock.mainThread = (TCB_t*) malloc(sizeof(TCB_t));
+  controlBlock.mainThread->tid = 0;
+  controlBlock.mainThread->state = PROCST_EXEC;
+  controlBlock.mainThread->prio = 0;
 
   /*
     Set ending function for all created threads
@@ -57,21 +57,21 @@ int cinit(void) {
     Create context to main thread
     Set Main thread as running
   */
-  getcontext(&mainThread->context);
-  mainThread->context.uc_link =  &controlBlock.endThread;
-  mainThread->context.uc_stack.ss_sp = (char*) malloc(SIGSTKSZ);
-  mainThread->context.uc_stack.ss_size = SIGSTKSZ;
+  getcontext(&controlBlock.mainThread->context);
+  controlBlock.mainThread->context.uc_link =  &controlBlock.endThread;
+  controlBlock.mainThread->context.uc_stack.ss_sp = (char*) malloc(SIGSTKSZ);
+  controlBlock.mainThread->context.uc_stack.ss_size = SIGSTKSZ;
+  // makecontext(&controlBlock.mainThread->context, (void (*)(void))endThread, 0);
 
  //insere na allthreads só após copia de contexto
-  controlBlock.runningThread = mainThread;
+  controlBlock.runningThread = controlBlock.mainThread;
 
-  if (insertFILA2(&controlBlock.allThreads, (void *) mainThread) != 0){
+  if (insertFILA2(&controlBlock.allThreads, (void *) controlBlock.runningThread) != 0){
     #if DEBUG
       printf("[ERRO] cinit - insert - Não inserida em allThreads \n");
     #endif
     return -4;
   }
-
 
   return 0;
 };
@@ -142,6 +142,7 @@ int generateTID(void) {
 
 */
 int scheduler(void) {
+  setcontext(&controlBlock.mainThread->context);
 	#if DEBUG
     printf("[SCHEDULER]- RunningThread - TID[%d] - PRIO[%d] \n", controlBlock.runningThread->tid, controlBlock.runningThread->prio);
 	#endif
@@ -217,6 +218,10 @@ int dispatcher(TCB_t* nextRunningThread){
     //Altera a prioridade da thread
 
     currentThread->prio = currentThread->prio + stopTimer();
+    startTimer();
+    controlBlock.runningThread = nextRunningThread;
+    //inicia o timer da prioridade
+
     #if DEBUG
     printf("[DISPATCHER]- CurrentThread New Prio- TID[%d] - PRIO[%d] \n", currentThread->tid, currentThread->prio);
     #endif
@@ -224,7 +229,7 @@ int dispatcher(TCB_t* nextRunningThread){
     switch(currentThread->state){
 
       case PROCST_TERMINO:
-		    #if DEBUG
+        #if DEBUG
         printf("[DISPATCHER] - CASE PROCST_TERMINO \n");
         #endif
         //deletar thread da allthreads ?
@@ -241,7 +246,7 @@ int dispatcher(TCB_t* nextRunningThread){
         break;
     // Caso a thread esteja foi bloqueda insere na fila de bloqueadas
       case PROCST_BLOQ:
-		    #if DEBUG
+        #if DEBUG
         printf("[DISPATCHER] - CASE PROCST_BLOQ \n");
         #endif
         if(insertFILA2((PFILA2) &controlBlock.blockedThreads, (void *) currentThread) != 0){
@@ -256,7 +261,7 @@ int dispatcher(TCB_t* nextRunningThread){
       case PROCST_APTO:
       case PROCST_EXEC:
       default:
-		    #if DEBUG
+        #if DEBUG
         printf("[DISPATCHER] - CASE PROCST_APTO PROCST_EXEC DEFAULT\n");
         #endif
         currentThread->state = PROCST_APTO;
@@ -270,15 +275,9 @@ int dispatcher(TCB_t* nextRunningThread){
     }
   }
 
-  controlBlock.runningThread = nextRunningThread;
-
-  //inicia o timer da prioridade
-  startTimer();
-
   //efetua a troca de contexto running <-> next
-  swapcontext(&currentThread->context, &nextRunningThread->context);
-
-  return 0;
+  return swapcontext(&currentThread->context, &controlBlock.runningThread->context);
+ 
 }
 
 //Copiada da /src/insert.c

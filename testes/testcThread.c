@@ -35,6 +35,8 @@ int main() {
   printf("\n >> Teste da CIDENTIFY << \n");
   printf("\t \t CINIT = %d \n", cinit());
 
+  printf("\t \t runningThread = %d \n", controlBlock.runningThread->tid);
+
   int size = 93;
   char *name = malloc(sizeof(size));
 
@@ -85,14 +87,14 @@ int main() {
 
 	printf("\n ----------- \n");
 
-	sleep(1);
+	// sleep(1);
 
 
   // ** FIM DO TESTE CIDENTIFY + CCREATE **
 
   // >> ATRIBUINDO CJOIN AS THREADS RECEM GERADAS << (CIDENTIFY + CCREATE + CJOIN)
-	printf("CJOIN na THREAD 1 (SUCESSO = 0): %d \n", cyield());
-	//printf("CJOIN na THREAD 2 (SUCESSO = 0): %d \n", cjoin(id1));
+	// printf("CJOIN na THREAD 1 (SUCESSO = 0): %d \n", cyield());
+	printf("CJOIN na THREAD 0 (SUCESSO = 0): %d \n", cjoin(id1));
 
 
   // ** FIM DO TESTE CIDENTIFY + CCREATE + CJOIN **

@@ -51,9 +51,10 @@ struct control {
 	PFILA2 blockedThreads;
 	
 	TCB_t* runningThread;
+	TCB_t* mainThread;
+
 	ucontext_t endThread;
 
-	//flag dispatcher action
 };
 
 extern struct control controlBlock;
